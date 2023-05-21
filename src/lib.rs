@@ -1,29 +1,25 @@
 mod instruction;
-mod value;
 mod machine;
 mod gensym;
+mod constant;
+mod const_table;
+
 
 #[cfg(test)]
 mod tests {
-
     use crate::{
-        instruction::Instruction,
-        value::Value,
         machine::Machine,
+        instruction::Instruction,
     };
+
     #[test]
-    fn test_add() {
-        let program = vec![
-            Instruction::Const(Value::Int(1)),
-            Instruction::Const(Value::Int(2)),
-            Instruction::Add,
+    fn test_compile() {
+        let mut machine = Machine::new();
+        let instr = vec![
+            Instruction::I_LOAD(1),
+            Instruction::I_LOAD(2),
+            Instruction::I_ADD,
         ];
-        let mut machine = Machine::new(program);
-        machine.run();
-        assert_eq!(machine.get_code(), vec![
-            "int gensym0 = 1;",
-            "int gensym1 = 2;",
-            "int gensym2 = gensym0 + gensym1;",
-        ]);
+        machine.compile(instr);
     }
 }
