@@ -42,9 +42,26 @@ impl Machine {
             .output()
             .expect("failed to execute process");
         if !output.status.success() {
+            io::stdout().write_all(&output.stdout).unwrap();
+            io::stderr().write_all(&output.stderr).unwrap();
             panic!("failed to compile");
         }
+        // remove temporary file
         std::fs::remove_file(fpath).unwrap();
+        // execute temporary file
+        let output = Command::new("./temp")
+            .stdout(Stdio::piped())
+            .output()
+            .expect("failed to execute process");
+        if !output.status.success() {
+            io::stdout().write_all(&output.stdout).unwrap();
+            io::stderr().write_all(&output.stderr).unwrap();
+            panic!("failed to execute");
+        }
+        // print output
+        io::stdout().write_all(&output.stdout).unwrap();
+        // remove temporary file
+        std::fs::remove_file("temp").unwrap();
     }
     
     pub fn load_instrs(&mut self, instrs: Vec<Instruction>) {
@@ -54,7 +71,11 @@ impl Machine {
     pub fn assemble(&mut self) -> String {
         self.run();
         let body = self.code.join("");
-        format!("int main() {{\n{}\n}}", body)
+        let header = "#include <stdio.h>\n
+                      #include <stdbool.h>\n
+                      #include <stdint.h>\n
+                      #include <inttypes.h>\n";
+        format!("{} int main() {{\n{}\n}}", header, body)
     }
 
     fn push(&mut self, symbol: &str) {
@@ -112,6 +133,212 @@ impl Machine {
         }
     }
 
+    fn int_sub(&mut self) {
+        let right = self.expect(Type::I32);
+        let left = self.expect(Type::I32);
+        match (left, right) {
+            (Ok(left), Ok(right)) => {
+                let symbol = self.push_constant(Constant::I32(0));
+                self.code.push(format!("int {} = {} - {};\n", symbol, left, right));
+                self.push(&symbol);
+            }
+            (Err(e), _) | (_, Err(e)) => panic!("{}", e),
+        }
+    }
+
+    fn int_mul(&mut self) {
+        let right = self.expect(Type::I32);
+        let left = self.expect(Type::I32);
+        match (left, right) {
+            (Ok(left), Ok(right)) => {
+                let symbol = self.push_constant(Constant::I32(0));
+                self.code.push(format!("int {} = {} * {};\n", symbol, left, right));
+                self.push(&symbol);
+            }
+            (Err(e), _) | (_, Err(e)) => panic!("{}", e),
+        }
+    }
+
+    fn int_div(&mut self) {
+        let right = self.expect(Type::I32);
+        let left = self.expect(Type::I32);
+        match (left, right) {
+            (Ok(left), Ok(right)) => {
+                let symbol = self.push_constant(Constant::I32(0));
+                self.code.push(format!("int {} = {} / {};\n", symbol, left, right));
+                self.push(&symbol);
+            }
+            (Err(e), _) | (_, Err(e)) => panic!("{}", e),
+        }
+    }
+
+    fn int_mod(&mut self) {
+        let right = self.expect(Type::I32);
+        let left = self.expect(Type::I32);
+        match (left, right) {
+            (Ok(left), Ok(right)) => {
+                let symbol = self.push_constant(Constant::I32(0));
+                self.code.push(format!("int {} = {} % {};\n", symbol, left, right));
+                self.push(&symbol);
+            }
+            (Err(e), _) | (_, Err(e)) => panic!("{}", e),
+        }
+    }
+
+    fn int_shl(&mut self) {
+        let right = self.expect(Type::I32);
+        let left = self.expect(Type::I32);
+        match (left, right) {
+            (Ok(left), Ok(right)) => {
+                let symbol = self.push_constant(Constant::I32(0));
+                self.code.push(format!("int {} = {} << {};\n", symbol, left, right));
+                self.push(&symbol);
+            }
+            (Err(e), _) | (_, Err(e)) => panic!("{}", e),
+        }
+    }
+
+    fn int_shr(&mut self) {
+        let right = self.expect(Type::I32);
+        let left = self.expect(Type::I32);
+        match (left, right) {
+            (Ok(left), Ok(right)) => {
+                let symbol = self.push_constant(Constant::I32(0));
+                self.code.push(format!("int {} = {} >> {};\n", symbol, left, right));
+                self.push(&symbol);
+            }
+            (Err(e), _) | (_, Err(e)) => panic!("{}", e),
+        }
+    }
+
+    fn int_and(&mut self) {
+        let right = self.expect(Type::I32);
+        let left = self.expect(Type::I32);
+        match (left, right) {
+            (Ok(left), Ok(right)) => {
+                let symbol = self.push_constant(Constant::I32(0));
+                self.code.push(format!("int {} = {} & {};\n", symbol, left, right));
+                self.push(&symbol);
+            }
+            (Err(e), _) | (_, Err(e)) => panic!("{}", e),
+        }
+    }
+
+    fn int_or(&mut self) {
+        let right = self.expect(Type::I32);
+        let left = self.expect(Type::I32);
+        match (left, right) {
+            (Ok(left), Ok(right)) => {
+                let symbol = self.push_constant(Constant::I32(0));
+                self.code.push(format!("int {} = {} | {};\n", symbol, left, right));
+                self.push(&symbol);
+            }
+            (Err(e), _) | (_, Err(e)) => panic!("{}", e),
+        }
+    }
+
+    fn int_xor(&mut self) {
+        let right = self.expect(Type::I32);
+        let left = self.expect(Type::I32);
+        match (left, right) {
+            (Ok(left), Ok(right)) => {
+                let symbol = self.push_constant(Constant::I32(0));
+                self.code.push(format!("int {} = {} ^ {};\n", symbol, left, right));
+                self.push(&symbol);
+            }
+            (Err(e), _) | (_, Err(e)) => panic!("{}", e),
+        }
+    }
+
+    fn int_eq(&mut self) {
+        let right = self.expect(Type::I32);
+        let left = self.expect(Type::I32);
+        match (left, right) {
+            (Ok(left), Ok(right)) => {
+                let symbol = self.push_constant(Constant::Bool(false));
+                self.code.push(format!("bool {} = {} == {};\n", symbol, left, right));
+                self.push(&symbol);
+            }
+            (Err(e), _) | (_, Err(e)) => panic!("{}", e),
+        }
+    }
+
+    fn int_neq(&mut self) {
+        let right = self.expect(Type::I32);
+        let left = self.expect(Type::I32);
+        match (left, right) {
+            (Ok(left), Ok(right)) => {
+                let symbol = self.push_constant(Constant::Bool(false));
+                self.code.push(format!("bool {} = {} != {};\n", symbol, left, right));
+                self.push(&symbol);
+            }
+            (Err(e), _) | (_, Err(e)) => panic!("{}", e),
+        }
+    }
+
+    fn int_lt(&mut self) {
+        let right = self.expect(Type::I32);
+        let left = self.expect(Type::I32);
+        match (left, right) {
+            (Ok(left), Ok(right)) => {
+                let symbol = self.push_constant(Constant::Bool(false));
+                self.code.push(format!("bool {} = {} < {};\n", symbol, left, right));
+                self.push(&symbol);
+            }
+            (Err(e), _) | (_, Err(e)) => panic!("{}", e),
+        }
+    }
+
+    fn int_lte(&mut self) {
+        let right = self.expect(Type::I32);
+        let left = self.expect(Type::I32);
+        match (left, right) {
+            (Ok(left), Ok(right)) => {
+                let symbol = self.push_constant(Constant::Bool(false));
+                self.code.push(format!("bool {} = {} <= {};\n", symbol, left, right));
+                self.push(&symbol);
+            }
+            (Err(e), _) | (_, Err(e)) => panic!("{}", e),
+        }
+    }
+
+    fn int_gt(&mut self) {
+        let right = self.expect(Type::I32);
+        let left = self.expect(Type::I32);
+        match (left, right) {
+            (Ok(left), Ok(right)) => {
+                let symbol = self.push_constant(Constant::Bool(false));
+                self.code.push(format!("bool {} = {} > {};\n", symbol, left, right));
+                self.push(&symbol);
+            }
+            (Err(e), _) | (_, Err(e)) => panic!("{}", e),
+        }
+    }
+
+    fn int_gte(&mut self) {
+        let right = self.expect(Type::I32);
+        let left = self.expect(Type::I32);
+        match (left, right) {
+            (Ok(left), Ok(right)) => {
+                let symbol = self.push_constant(Constant::Bool(false));
+                self.code.push(format!("bool {} = {} >= {};\n", symbol, left, right));
+                self.push(&symbol);
+            }
+            (Err(e), _) | (_, Err(e)) => panic!("{}", e),
+        }
+    }
+
+
+    fn int_print(&mut self) {
+        let symbol = self.expect(Type::I32).unwrap();
+        self.code.push(format!("printf(\"%d\\n\", {});\n", symbol));
+    }
+
+    fn bool_print(&mut self) {
+        let symbol = self.expect(Type::Bool).unwrap();
+        self.code.push(format!("printf(\"%s\\n\", {} ? \"true\" : \"false\");\n", symbol));
+    }
+
     fn eval(&mut self) {
         let instr = &self.instrs[self.ip];
         match instr {
@@ -119,6 +346,23 @@ impl Machine {
             Instruction::F_LOAD(f) => self.load_float(*f),
             Instruction::B_LOAD(b) => self.load_bool(*b),
             Instruction::I_ADD => self.int_add(),
+            Instruction::I_SUB => self.int_sub(),
+            Instruction::I_MUL => self.int_mul(),
+            Instruction::I_DIV => self.int_div(),
+            Instruction::I_MOD => self.int_mod(),
+            Instruction::I_SHL => self.int_shl(),
+            Instruction::I_SHR => self.int_shr(),
+            Instruction::I_AND => self.int_and(),
+            Instruction::I_OR => self.int_or(),
+            Instruction::I_XOR => self.int_xor(),
+            Instruction::I_EQ => self.int_eq(),
+            Instruction::I_NE => self.int_neq(),
+            Instruction::I_LT => self.int_lt(),
+            Instruction::I_LE => self.int_lte(),
+            Instruction::I_GT => self.int_gt(),
+            Instruction::I_GE => self.int_gte(),
+            Instruction::I_PRINT => self.int_print(),
+            Instruction::B_PRINT => self.bool_print(),
             _ => panic!("unimplemented"),
         }
         self.ip += 1;

@@ -9,14 +9,6 @@ impl Gensym {
         }
     }
 
-    pub fn get_counter(&self) -> u32 {
-        self.counter
-    }
-
-    pub fn reset(&mut self) {
-        self.counter = 0;
-    }
-
     pub fn next(&mut self) -> String {
         let symbol = format!("gensym{}", self.counter);
         self.counter += 1;

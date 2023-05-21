@@ -18,10 +18,8 @@ pub enum Instruction {
     I_LE,
     I_GT,
     I_GE,
-    I_NEG,
-    I_CAST,
     I_PRINT,
-    I_DROP,
+
     
     // floating point operations
     F_LOAD(f32),
@@ -36,10 +34,8 @@ pub enum Instruction {
     F_LE,
     F_GT,
     F_GE,
-    F_NEG,
-    F_CAST,
     F_PRINT,
-    F_DROP,
+
 
     // boolean operations
     B_LOAD(bool),
@@ -49,6 +45,6 @@ pub enum Instruction {
     B_EQ,
     B_NE,
     B_PRINT,
-    B_DROP,
+
 
 }
