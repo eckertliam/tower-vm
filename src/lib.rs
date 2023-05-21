@@ -63,8 +63,11 @@ mod tests {
             Instruction::I_EQ,
             Instruction::B_IF(vec![
                 Instruction::I_LOAD(1),
+                Instruction::I_LOAD(1),
                 Instruction::I_PRINT,
             ]),
+            Instruction::I_LOAD(0),
+            Instruction::I_PRINT,
         ];
         machine.compile(instr);
     }

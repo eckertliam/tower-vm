@@ -4,7 +4,7 @@ use crate::{
     constant::{Constant, Type},
 };
 
-use std::process::{Command, Stdio};
+use std::{process::{Command, Stdio}, result};
 use std::io::{self, Write};
 
 pub struct Machine {
@@ -116,212 +116,86 @@ impl Machine {
         self.code.push(format!("bool {} = {};\n", symbol, b));
     }
 
-    fn int_add(&mut self) {
-        let right = self.expect(Type::I32);
-        let left = self.expect(Type::I32);
+    fn binary_op(&mut self, op: &str, lhs_t: Type, rhs_t: Type, result_type: Type) {
+        let right = self.expect(rhs_t);
+        let left = self.expect(lhs_t);
         match (left, right) {
             (Ok(left), Ok(right)) => {
-                let symbol = self.push_constant(Constant::I32(0));
-                self.code.push(format!("int {} = {} + {};\n", symbol, left, right));
+                let symbol = match result_type {
+                    Type::I32 => self.push_constant(Constant::I32(0)),
+                    Type::F32 => self.push_constant(Constant::F32(0.0)),
+                    Type::Bool => self.push_constant(Constant::Bool(false)),
+                };
+                let t_str = result_type.to_string();
+                self.code.push(format!("{} {} = {} {} {};\n", t_str, symbol, left, op, right));
                 self.push(&symbol);
             }
             (Err(e), _) | (_, Err(e)) => panic!("{}", e),
         }
+    }
+
+    fn int_add(&mut self) {
+        self.binary_op("+", Type::I32, Type::I32, Type::I32);
     }
 
     fn int_sub(&mut self) {
-        let right = self.expect(Type::I32);
-        let left = self.expect(Type::I32);
-        match (left, right) {
-            (Ok(left), Ok(right)) => {
-                let symbol = self.push_constant(Constant::I32(0));
-                self.code.push(format!("int {} = {} - {};\n", symbol, left, right));
-                self.push(&symbol);
-            }
-            (Err(e), _) | (_, Err(e)) => panic!("{}", e),
-        }
+        self.binary_op("-", Type::I32, Type::I32, Type::I32)
     }
 
     fn int_mul(&mut self) {
-        let right = self.expect(Type::I32);
-        let left = self.expect(Type::I32);
-        match (left, right) {
-            (Ok(left), Ok(right)) => {
-                let symbol = self.push_constant(Constant::I32(0));
-                self.code.push(format!("int {} = {} * {};\n", symbol, left, right));
-                self.push(&symbol);
-            }
-            (Err(e), _) | (_, Err(e)) => panic!("{}", e),
-        }
+        self.binary_op("*", Type::I32, Type::I32, Type::I32);
     }
 
     fn int_div(&mut self) {
-        let right = self.expect(Type::I32);
-        let left = self.expect(Type::I32);
-        match (left, right) {
-            (Ok(left), Ok(right)) => {
-                let symbol = self.push_constant(Constant::I32(0));
-                self.code.push(format!("int {} = {} / {};\n", symbol, left, right));
-                self.push(&symbol);
-            }
-            (Err(e), _) | (_, Err(e)) => panic!("{}", e),
-        }
+        self.binary_op("/", Type::I32, Type::I32, Type::I32);
     }
 
     fn int_mod(&mut self) {
-        let right = self.expect(Type::I32);
-        let left = self.expect(Type::I32);
-        match (left, right) {
-            (Ok(left), Ok(right)) => {
-                let symbol = self.push_constant(Constant::I32(0));
-                self.code.push(format!("int {} = {} % {};\n", symbol, left, right));
-                self.push(&symbol);
-            }
-            (Err(e), _) | (_, Err(e)) => panic!("{}", e),
-        }
+        self.binary_op("%", Type::I32, Type::I32, Type::I32);
     }
 
     fn int_shl(&mut self) {
-        let right = self.expect(Type::I32);
-        let left = self.expect(Type::I32);
-        match (left, right) {
-            (Ok(left), Ok(right)) => {
-                let symbol = self.push_constant(Constant::I32(0));
-                self.code.push(format!("int {} = {} << {};\n", symbol, left, right));
-                self.push(&symbol);
-            }
-            (Err(e), _) | (_, Err(e)) => panic!("{}", e),
-        }
+        self.binary_op("<<", Type::I32, Type::I32, Type::I32);
     }
 
     fn int_shr(&mut self) {
-        let right = self.expect(Type::I32);
-        let left = self.expect(Type::I32);
-        match (left, right) {
-            (Ok(left), Ok(right)) => {
-                let symbol = self.push_constant(Constant::I32(0));
-                self.code.push(format!("int {} = {} >> {};\n", symbol, left, right));
-                self.push(&symbol);
-            }
-            (Err(e), _) | (_, Err(e)) => panic!("{}", e),
-        }
+        self.binary_op(">>", Type::I32, Type::I32, Type::I32);
     }
 
     fn int_and(&mut self) {
-        let right = self.expect(Type::I32);
-        let left = self.expect(Type::I32);
-        match (left, right) {
-            (Ok(left), Ok(right)) => {
-                let symbol = self.push_constant(Constant::I32(0));
-                self.code.push(format!("int {} = {} & {};\n", symbol, left, right));
-                self.push(&symbol);
-            }
-            (Err(e), _) | (_, Err(e)) => panic!("{}", e),
-        }
+        self.binary_op("&", Type::I32, Type::I32, Type::I32);
     }
 
     fn int_or(&mut self) {
-        let right = self.expect(Type::I32);
-        let left = self.expect(Type::I32);
-        match (left, right) {
-            (Ok(left), Ok(right)) => {
-                let symbol = self.push_constant(Constant::I32(0));
-                self.code.push(format!("int {} = {} | {};\n", symbol, left, right));
-                self.push(&symbol);
-            }
-            (Err(e), _) | (_, Err(e)) => panic!("{}", e),
-        }
+        self.binary_op("|", Type::I32, Type::I32, Type::I32);
     }
 
     fn int_xor(&mut self) {
-        let right = self.expect(Type::I32);
-        let left = self.expect(Type::I32);
-        match (left, right) {
-            (Ok(left), Ok(right)) => {
-                let symbol = self.push_constant(Constant::I32(0));
-                self.code.push(format!("int {} = {} ^ {};\n", symbol, left, right));
-                self.push(&symbol);
-            }
-            (Err(e), _) | (_, Err(e)) => panic!("{}", e),
-        }
+        self.binary_op("^", Type::I32, Type::I32, Type::I32);
     }
 
     fn int_eq(&mut self) {
-        let right = self.expect(Type::I32);
-        let left = self.expect(Type::I32);
-        match (left, right) {
-            (Ok(left), Ok(right)) => {
-                let symbol = self.push_constant(Constant::Bool(false));
-                self.code.push(format!("bool {} = {} == {};\n", symbol, left, right));
-                self.push(&symbol);
-            }
-            (Err(e), _) | (_, Err(e)) => panic!("{}", e),
-        }
+        self.binary_op("==", Type::I32, Type::I32, Type::Bool);
     }
 
     fn int_neq(&mut self) {
-        let right = self.expect(Type::I32);
-        let left = self.expect(Type::I32);
-        match (left, right) {
-            (Ok(left), Ok(right)) => {
-                let symbol = self.push_constant(Constant::Bool(false));
-                self.code.push(format!("bool {} = {} != {};\n", symbol, left, right));
-                self.push(&symbol);
-            }
-            (Err(e), _) | (_, Err(e)) => panic!("{}", e),
-        }
+        self.binary_op("!=", Type::I32, Type::I32, Type::Bool);
     }
 
     fn int_lt(&mut self) {
-        let right = self.expect(Type::I32);
-        let left = self.expect(Type::I32);
-        match (left, right) {
-            (Ok(left), Ok(right)) => {
-                let symbol = self.push_constant(Constant::Bool(false));
-                self.code.push(format!("bool {} = {} < {};\n", symbol, left, right));
-                self.push(&symbol);
-            }
-            (Err(e), _) | (_, Err(e)) => panic!("{}", e),
-        }
+        self.binary_op("<", Type::I32, Type::I32, Type::Bool);
     }
 
     fn int_lte(&mut self) {
-        let right = self.expect(Type::I32);
-        let left = self.expect(Type::I32);
-        match (left, right) {
-            (Ok(left), Ok(right)) => {
-                let symbol = self.push_constant(Constant::Bool(false));
-                self.code.push(format!("bool {} = {} <= {};\n", symbol, left, right));
-                self.push(&symbol);
-            }
-            (Err(e), _) | (_, Err(e)) => panic!("{}", e),
-        }
+        self.binary_op("<=", Type::I32, Type::I32, Type::Bool);
     }
 
     fn int_gt(&mut self) {
-        let right = self.expect(Type::I32);
-        let left = self.expect(Type::I32);
-        match (left, right) {
-            (Ok(left), Ok(right)) => {
-                let symbol = self.push_constant(Constant::Bool(false));
-                self.code.push(format!("bool {} = {} > {};\n", symbol, left, right));
-                self.push(&symbol);
-            }
-            (Err(e), _) | (_, Err(e)) => panic!("{}", e),
-        }
+        self.binary_op(">", Type::I32, Type::I32, Type::Bool);
     }
 
     fn int_gte(&mut self) {
-        let right = self.expect(Type::I32);
-        let left = self.expect(Type::I32);
-        match (left, right) {
-            (Ok(left), Ok(right)) => {
-                let symbol = self.push_constant(Constant::Bool(false));
-                self.code.push(format!("bool {} = {} >= {};\n", symbol, left, right));
-                self.push(&symbol);
-            }
-            (Err(e), _) | (_, Err(e)) => panic!("{}", e),
-        }
+        self.binary_op(">=", Type::I32, Type::I32, Type::Bool);
     }
 
 
@@ -343,198 +217,63 @@ impl Machine {
     }
 
     fn bool_and(&mut self) {
-        let right = self.expect(Type::Bool);
-        let left = self.expect(Type::Bool);
-        match (left, right) {
-            (Ok(left), Ok(right)) => {
-                let symbol = self.push_constant(Constant::Bool(false));
-                self.code.push(format!("bool {} = {} && {};\n", symbol, left, right));
-                self.push(&symbol);
-            }
-            (Err(e), _) | (_, Err(e)) => panic!("{}", e),
-        }
+        self.binary_op("&&", Type::Bool, Type::Bool, Type::Bool);
     }
 
     fn bool_or(&mut self) {
-        let right = self.expect(Type::Bool);
-        let left = self.expect(Type::Bool);
-        match (left, right) {
-            (Ok(left), Ok(right)) => {
-                let symbol = self.push_constant(Constant::Bool(false));
-                self.code.push(format!("bool {} = {} || {};\n", symbol, left, right));
-                self.push(&symbol);
-            }
-            (Err(e), _) | (_, Err(e)) => panic!("{}", e),
-        }
+        self.binary_op("||", Type::Bool, Type::Bool, Type::Bool);
     }
 
     fn bool_eq(&mut self) {
-        let right = self.expect(Type::Bool);
-        let left = self.expect(Type::Bool);
-        match (left, right) {
-            (Ok(left), Ok(right)) => {
-                let symbol = self.push_constant(Constant::Bool(false));
-                self.code.push(format!("bool {} = {} == {};\n", symbol, left, right));
-                self.push(&symbol);
-            }
-            (Err(e), _) | (_, Err(e)) => panic!("{}", e),
-        }
+        self.binary_op("==", Type::Bool, Type::Bool, Type::Bool);
     }
 
     fn bool_neq(&mut self) {
-        let right = self.expect(Type::Bool);
-        let left = self.expect(Type::Bool);
-        match (left, right) {
-            (Ok(left), Ok(right)) => {
-                let symbol = self.push_constant(Constant::Bool(false));
-                self.code.push(format!("bool {} = {} != {};\n", symbol, left, right));
-                self.push(&symbol);
-            }
-            (Err(e), _) | (_, Err(e)) => panic!("{}", e),
-        }
+        self.binary_op("!=", Type::Bool, Type::Bool, Type::Bool);
     }
 
     fn float_add(&mut self) {
-        let right = self.expect(Type::F32);
-        let left = self.expect(Type::F32);
-        match (left, right) {
-            (Ok(left), Ok(right)) => {
-                let symbol = self.push_constant(Constant::F32(0.0));
-                self.code.push(format!("float {} = {} + {};\n", symbol, left, right));
-                self.push(&symbol);
-            }
-            (Err(e), _) | (_, Err(e)) => panic!("{}", e),
-        }
+        self.binary_op("+", Type::F32, Type::F32, Type::F32);
     }
 
     fn float_sub(&mut self) {
-        let right = self.expect(Type::F32);
-        let left = self.expect(Type::F32);
-        match (left, right) {
-            (Ok(left), Ok(right)) => {
-                let symbol = self.push_constant(Constant::F32(0.0));
-                self.code.push(format!("float {} = {} - {};\n", symbol, left, right));
-                self.push(&symbol);
-            }
-            (Err(e), _) | (_, Err(e)) => panic!("{}", e),
-        }
+        self.binary_op("-", Type::F32, Type::F32, Type::F32);
     }
 
     fn float_mul(&mut self) {
-        let right = self.expect(Type::F32);
-        let left = self.expect(Type::F32);
-        match (left, right) {
-            (Ok(left), Ok(right)) => {
-                let symbol = self.push_constant(Constant::F32(0.0));
-                self.code.push(format!("float {} = {} * {};\n", symbol, left, right));
-                self.push(&symbol);
-            }
-            (Err(e), _) | (_, Err(e)) => panic!("{}", e),
-        }
+        self.binary_op("*", Type::F32, Type::F32, Type::F32);
     }
 
     fn float_div(&mut self) {
-        let right = self.expect(Type::F32);
-        let left = self.expect(Type::F32);
-        match (left, right) {
-            (Ok(left), Ok(right)) => {
-                let symbol = self.push_constant(Constant::F32(0.0));
-                self.code.push(format!("float {} = {} / {};\n", symbol, left, right));
-                self.push(&symbol);
-            }
-            (Err(e), _) | (_, Err(e)) => panic!("{}", e),
-        }
+        self.binary_op("/", Type::F32, Type::F32, Type::F32);
     }
 
     fn float_mod(&mut self) {
-        let right = self.expect(Type::F32);
-        let left = self.expect(Type::F32);
-        match (left, right) {
-            (Ok(left), Ok(right)) => {
-                let symbol = self.push_constant(Constant::F32(0.0));
-                self.code.push(format!("float {} = fmodf({}, {});\n", symbol, left, right));
-                self.push(&symbol);
-            }
-            (Err(e), _) | (_, Err(e)) => panic!("{}", e),
-        }
+        self.binary_op("%", Type::F32, Type::F32, Type::F32);
     }
 
     fn float_eq(&mut self) {
-        let right = self.expect(Type::F32);
-        let left = self.expect(Type::F32);
-        match (left, right) {
-            (Ok(left), Ok(right)) => {
-                let symbol = self.push_constant(Constant::Bool(false));
-                self.code.push(format!("bool {} = {} == {};\n", symbol, left, right));
-                self.push(&symbol);
-            }
-            (Err(e), _) | (_, Err(e)) => panic!("{}", e),
-        }
+        self.binary_op("==", Type::F32, Type::F32, Type::Bool);
     }
 
     fn float_neq(&mut self) {
-        let right = self.expect(Type::F32);
-        let left = self.expect(Type::F32);
-        match (left, right) {
-            (Ok(left), Ok(right)) => {
-                let symbol = self.push_constant(Constant::Bool(false));
-                self.code.push(format!("bool {} = {} != {};\n", symbol, left, right));
-                self.push(&symbol);
-            }
-            (Err(e), _) | (_, Err(e)) => panic!("{}", e),
-        }
+        self.binary_op("!=", Type::F32, Type::F32, Type::Bool);
     }
 
     fn float_lt(&mut self) {
-        let right = self.expect(Type::F32);
-        let left = self.expect(Type::F32);
-        match (left, right) {
-            (Ok(left), Ok(right)) => {
-                let symbol = self.push_constant(Constant::Bool(false));
-                self.code.push(format!("bool {} = {} < {};\n", symbol, left, right));
-                self.push(&symbol);
-            }
-            (Err(e), _) | (_, Err(e)) => panic!("{}", e),
-        }
+        self.binary_op("<", Type::F32, Type::F32, Type::Bool);
     }
 
     fn float_gt(&mut self) {
-        let right = self.expect(Type::F32);
-        let left = self.expect(Type::F32);
-        match (left, right) {
-            (Ok(left), Ok(right)) => {
-                let symbol = self.push_constant(Constant::Bool(false));
-                self.code.push(format!("bool {} = {} > {};\n", symbol, left, right));
-                self.push(&symbol);
-            }
-            (Err(e), _) | (_, Err(e)) => panic!("{}", e),
-        }
+        self.binary_op(">", Type::F32, Type::F32, Type::Bool);
     }
 
     fn float_leq(&mut self) {
-        let right = self.expect(Type::F32);
-        let left = self.expect(Type::F32);
-        match (left, right) {
-            (Ok(left), Ok(right)) => {
-                let symbol = self.push_constant(Constant::Bool(false));
-                self.code.push(format!("bool {} = {} <= {};\n", symbol, left, right));
-                self.push(&symbol);
-            }
-            (Err(e), _) | (_, Err(e)) => panic!("{}", e),
-        }
+        self.binary_op("<=", Type::F32, Type::F32, Type::Bool);
     }
 
     fn float_geq(&mut self) {
-        let right = self.expect(Type::F32);
-        let left = self.expect(Type::F32);
-        match (left, right) {
-            (Ok(left), Ok(right)) => {
-                let symbol = self.push_constant(Constant::Bool(false));
-                self.code.push(format!("bool {} = {} >= {};\n", symbol, left, right));
-                self.push(&symbol);
-            }
-            (Err(e), _) | (_, Err(e)) => panic!("{}", e),
-        }
+        self.binary_op(">=", Type::F32, Type::F32, Type::Bool);
     }
 
     fn float_print(&mut self) {
@@ -552,9 +291,15 @@ impl Machine {
         match cond {
             Ok(cond) => {
                 self.code.push(format!("if ({}) {{\n", cond));
-                // eval each instruction in the block
+                // determine the length of the stack before the block is evaluated
+                let mut len = self.stack.len();
+                // evaluate the block
                 for instr in block {
                     self.eval(&instr);
+                }
+                // pop the stack until it is the same length as before the block was evaluated
+                while self.stack.len() > len {
+                    self.pop();
                 }
                 self.code.push("}\n".to_string());
             }
