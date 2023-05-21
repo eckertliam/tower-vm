@@ -31,14 +31,14 @@ impl Machine {
         self.run();
         let code = self.assemble();
         // create temporary file
-        let fpath = "temp.c";
+        let fpath = "/tmp/temp.c";
         let mut file = std::fs::File::create(fpath).unwrap();
         file.write_all(code.as_bytes()).unwrap();
         // compile temporary file
         let output = Command::new("cc")
             .arg(fpath)
             .arg("-o")
-            .arg("temp")
+            .arg("/tmp/temp")
             .output()
             .expect("failed to execute process");
         if !output.status.success() {
@@ -46,10 +46,8 @@ impl Machine {
             io::stderr().write_all(&output.stderr).unwrap();
             panic!("failed to compile");
         }
-        // remove temporary file
-        std::fs::remove_file(fpath).unwrap();
         // execute temporary file
-        let output = Command::new("./temp")
+        let output = Command::new("/tmp/temp")
             .stdout(Stdio::piped())
             .output()
             .expect("failed to execute process");
@@ -60,8 +58,6 @@ impl Machine {
         }
         // print output
         io::stdout().write_all(&output.stdout).unwrap();
-        // remove temporary file
-        std::fs::remove_file("temp").unwrap();
     }
     
     pub fn load_instrs(&mut self, instrs: Vec<Instruction>) {
@@ -339,6 +335,218 @@ impl Machine {
         self.code.push(format!("printf(\"%s\\n\", {} ? \"true\" : \"false\");\n", symbol));
     }
 
+    fn bool_not(&mut self) {
+        let val = self.expect(Type::Bool).unwrap();
+        let symbol = self.push_constant(Constant::Bool(false));
+        self.code.push(format!("bool {} = !{};\n", symbol, val));
+        self.push(&symbol);
+    }
+
+    fn bool_and(&mut self) {
+        let right = self.expect(Type::Bool);
+        let left = self.expect(Type::Bool);
+        match (left, right) {
+            (Ok(left), Ok(right)) => {
+                let symbol = self.push_constant(Constant::Bool(false));
+                self.code.push(format!("bool {} = {} && {};\n", symbol, left, right));
+                self.push(&symbol);
+            }
+            (Err(e), _) | (_, Err(e)) => panic!("{}", e),
+        }
+    }
+
+    fn bool_or(&mut self) {
+        let right = self.expect(Type::Bool);
+        let left = self.expect(Type::Bool);
+        match (left, right) {
+            (Ok(left), Ok(right)) => {
+                let symbol = self.push_constant(Constant::Bool(false));
+                self.code.push(format!("bool {} = {} || {};\n", symbol, left, right));
+                self.push(&symbol);
+            }
+            (Err(e), _) | (_, Err(e)) => panic!("{}", e),
+        }
+    }
+
+    fn bool_eq(&mut self) {
+        let right = self.expect(Type::Bool);
+        let left = self.expect(Type::Bool);
+        match (left, right) {
+            (Ok(left), Ok(right)) => {
+                let symbol = self.push_constant(Constant::Bool(false));
+                self.code.push(format!("bool {} = {} == {};\n", symbol, left, right));
+                self.push(&symbol);
+            }
+            (Err(e), _) | (_, Err(e)) => panic!("{}", e),
+        }
+    }
+
+    fn bool_neq(&mut self) {
+        let right = self.expect(Type::Bool);
+        let left = self.expect(Type::Bool);
+        match (left, right) {
+            (Ok(left), Ok(right)) => {
+                let symbol = self.push_constant(Constant::Bool(false));
+                self.code.push(format!("bool {} = {} != {};\n", symbol, left, right));
+                self.push(&symbol);
+            }
+            (Err(e), _) | (_, Err(e)) => panic!("{}", e),
+        }
+    }
+
+    fn float_add(&mut self) {
+        let right = self.expect(Type::F32);
+        let left = self.expect(Type::F32);
+        match (left, right) {
+            (Ok(left), Ok(right)) => {
+                let symbol = self.push_constant(Constant::F32(0.0));
+                self.code.push(format!("float {} = {} + {};\n", symbol, left, right));
+                self.push(&symbol);
+            }
+            (Err(e), _) | (_, Err(e)) => panic!("{}", e),
+        }
+    }
+
+    fn float_sub(&mut self) {
+        let right = self.expect(Type::F32);
+        let left = self.expect(Type::F32);
+        match (left, right) {
+            (Ok(left), Ok(right)) => {
+                let symbol = self.push_constant(Constant::F32(0.0));
+                self.code.push(format!("float {} = {} - {};\n", symbol, left, right));
+                self.push(&symbol);
+            }
+            (Err(e), _) | (_, Err(e)) => panic!("{}", e),
+        }
+    }
+
+    fn float_mul(&mut self) {
+        let right = self.expect(Type::F32);
+        let left = self.expect(Type::F32);
+        match (left, right) {
+            (Ok(left), Ok(right)) => {
+                let symbol = self.push_constant(Constant::F32(0.0));
+                self.code.push(format!("float {} = {} * {};\n", symbol, left, right));
+                self.push(&symbol);
+            }
+            (Err(e), _) | (_, Err(e)) => panic!("{}", e),
+        }
+    }
+
+    fn float_div(&mut self) {
+        let right = self.expect(Type::F32);
+        let left = self.expect(Type::F32);
+        match (left, right) {
+            (Ok(left), Ok(right)) => {
+                let symbol = self.push_constant(Constant::F32(0.0));
+                self.code.push(format!("float {} = {} / {};\n", symbol, left, right));
+                self.push(&symbol);
+            }
+            (Err(e), _) | (_, Err(e)) => panic!("{}", e),
+        }
+    }
+
+    fn float_mod(&mut self) {
+        let right = self.expect(Type::F32);
+        let left = self.expect(Type::F32);
+        match (left, right) {
+            (Ok(left), Ok(right)) => {
+                let symbol = self.push_constant(Constant::F32(0.0));
+                self.code.push(format!("float {} = fmodf({}, {});\n", symbol, left, right));
+                self.push(&symbol);
+            }
+            (Err(e), _) | (_, Err(e)) => panic!("{}", e),
+        }
+    }
+
+    fn float_eq(&mut self) {
+        let right = self.expect(Type::F32);
+        let left = self.expect(Type::F32);
+        match (left, right) {
+            (Ok(left), Ok(right)) => {
+                let symbol = self.push_constant(Constant::Bool(false));
+                self.code.push(format!("bool {} = {} == {};\n", symbol, left, right));
+                self.push(&symbol);
+            }
+            (Err(e), _) | (_, Err(e)) => panic!("{}", e),
+        }
+    }
+
+    fn float_neq(&mut self) {
+        let right = self.expect(Type::F32);
+        let left = self.expect(Type::F32);
+        match (left, right) {
+            (Ok(left), Ok(right)) => {
+                let symbol = self.push_constant(Constant::Bool(false));
+                self.code.push(format!("bool {} = {} != {};\n", symbol, left, right));
+                self.push(&symbol);
+            }
+            (Err(e), _) | (_, Err(e)) => panic!("{}", e),
+        }
+    }
+
+    fn float_lt(&mut self) {
+        let right = self.expect(Type::F32);
+        let left = self.expect(Type::F32);
+        match (left, right) {
+            (Ok(left), Ok(right)) => {
+                let symbol = self.push_constant(Constant::Bool(false));
+                self.code.push(format!("bool {} = {} < {};\n", symbol, left, right));
+                self.push(&symbol);
+            }
+            (Err(e), _) | (_, Err(e)) => panic!("{}", e),
+        }
+    }
+
+    fn float_gt(&mut self) {
+        let right = self.expect(Type::F32);
+        let left = self.expect(Type::F32);
+        match (left, right) {
+            (Ok(left), Ok(right)) => {
+                let symbol = self.push_constant(Constant::Bool(false));
+                self.code.push(format!("bool {} = {} > {};\n", symbol, left, right));
+                self.push(&symbol);
+            }
+            (Err(e), _) | (_, Err(e)) => panic!("{}", e),
+        }
+    }
+
+    fn float_leq(&mut self) {
+        let right = self.expect(Type::F32);
+        let left = self.expect(Type::F32);
+        match (left, right) {
+            (Ok(left), Ok(right)) => {
+                let symbol = self.push_constant(Constant::Bool(false));
+                self.code.push(format!("bool {} = {} <= {};\n", symbol, left, right));
+                self.push(&symbol);
+            }
+            (Err(e), _) | (_, Err(e)) => panic!("{}", e),
+        }
+    }
+
+    fn float_geq(&mut self) {
+        let right = self.expect(Type::F32);
+        let left = self.expect(Type::F32);
+        match (left, right) {
+            (Ok(left), Ok(right)) => {
+                let symbol = self.push_constant(Constant::Bool(false));
+                self.code.push(format!("bool {} = {} >= {};\n", symbol, left, right));
+                self.push(&symbol);
+            }
+            (Err(e), _) | (_, Err(e)) => panic!("{}", e),
+        }
+    }
+
+    fn float_print(&mut self) {
+        let value = self.expect(Type::F32);
+        match value {
+            Ok(value) => {
+                self.code.push(format!("printf(\"%f\\n\", {});\n", value));
+            }
+            Err(e) => panic!("{}", e),
+        }
+    }
+
     fn eval(&mut self) {
         let instr = &self.instrs[self.ip];
         match instr {
@@ -363,6 +571,23 @@ impl Machine {
             Instruction::I_GE => self.int_gte(),
             Instruction::I_PRINT => self.int_print(),
             Instruction::B_PRINT => self.bool_print(),
+            Instruction::B_NOT => self.bool_not(),
+            Instruction::B_AND => self.bool_and(),
+            Instruction::B_OR => self.bool_or(),
+            Instruction::B_EQ => self.bool_eq(),
+            Instruction::B_NE => self.bool_neq(),
+            Instruction::F_ADD => self.float_add(),
+            Instruction::F_SUB => self.float_sub(),
+            Instruction::F_MUL => self.float_mul(),
+            Instruction::F_DIV => self.float_div(),
+            Instruction::F_MOD => self.float_mod(),
+            Instruction::F_EQ => self.float_eq(),
+            Instruction::F_NE => self.float_neq(),
+            Instruction::F_LT => self.float_lt(),
+            Instruction::F_LE => self.float_leq(),
+            Instruction::F_GT => self.float_gt(),
+            Instruction::F_GE => self.float_geq(),
+            Instruction::F_PRINT => self.float_print(),
             _ => panic!("unimplemented"),
         }
         self.ip += 1;

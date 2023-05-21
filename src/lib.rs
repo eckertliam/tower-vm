@@ -35,4 +35,22 @@ mod tests {
         ];
         machine.compile(instr);
     }
+
+    #[test]
+    fn test_floats() {
+        let mut machine = Machine::new();
+        let instr = vec![
+            Instruction::F_LOAD(8.5),
+            Instruction::F_LOAD(8.5),
+            Instruction::F_ADD,
+            Instruction::F_PRINT,
+            Instruction::F_LOAD(8.5),
+            Instruction::F_LOAD(8.5),
+            Instruction::F_SUB,
+            Instruction::F_LOAD(0.0),
+            Instruction::F_EQ,
+            Instruction::B_PRINT,
+        ];
+        machine.compile(instr);
+    }
 }
