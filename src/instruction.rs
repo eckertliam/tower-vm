@@ -45,6 +45,5 @@ pub enum Instruction {
     B_EQ,
     B_NE,
     B_PRINT,
-
-
+    B_IF(Vec<Instruction>),
 }

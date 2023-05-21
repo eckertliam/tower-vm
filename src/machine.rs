@@ -547,8 +547,22 @@ impl Machine {
         }
     }
 
-    fn eval(&mut self) {
-        let instr = &self.instrs[self.ip];
+    fn bool_if(&mut self, block: Vec<Instruction>) {
+        let cond = self.expect(Type::Bool);
+        match cond {
+            Ok(cond) => {
+                self.code.push(format!("if ({}) {{\n", cond));
+                // eval each instruction in the block
+                for instr in block {
+                    self.eval(&instr);
+                }
+                self.code.push("}\n".to_string());
+            }
+            Err(e) => panic!("{}", e),
+        }
+    }
+
+    fn eval(&mut self, instr: &Instruction) {
         match instr {
             Instruction::I_LOAD(i) => self.load_int(*i),
             Instruction::F_LOAD(f) => self.load_float(*f),
@@ -588,14 +602,16 @@ impl Machine {
             Instruction::F_GT => self.float_gt(),
             Instruction::F_GE => self.float_geq(),
             Instruction::F_PRINT => self.float_print(),
-            _ => panic!("unimplemented"),
+            Instruction::B_IF(block) => self.bool_if(block.clone()),
+            _ => panic!("unimplemented {:?}", instr),
         }
-        self.ip += 1;
     }
 
     pub fn run(&mut self) {
         while self.ip < self.instrs.len() {
-            self.eval();
+            let instr = self.instrs[self.ip].clone();
+            self.eval(&instr);
+            self.ip += 1;
         }
     }
     
