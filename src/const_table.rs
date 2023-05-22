@@ -1,11 +1,10 @@
 use crate::{
-    gensym::Gensym,
-    constant::Constant,
+    gensym::Gensym, const_type::ConstType,
 };
 
 
 pub struct ConstantTable {
-    constants: Vec<Constant>,
+    types: Vec<ConstType>,
     id: Vec<String>,
     gensym: Gensym,
 }
@@ -13,27 +12,21 @@ pub struct ConstantTable {
 impl ConstantTable {
     pub fn new() -> Self {
         Self {
-            constants: Vec::new(),
+            types: Vec::new(),
             id: Vec::new(),
             gensym: Gensym::new(),
         }
     }
 
-    pub fn push(&mut self, constant: Constant) -> String {
+    pub fn push(&mut self, constant: ConstType) -> String {
         let symbol = self.gensym.next();
-        self.constants.push(constant);
+        self.types.push(constant);
         self.id.push(symbol.clone());
         symbol
     }
 
-    pub fn get(&self, symbol: &str) -> Option<&Constant> {
+    pub fn get(&self, symbol: &str) -> Option<&ConstType> {
         let index = self.id.iter().position(|s| s == symbol)?;
-        self.constants.get(index)
-    }
-
-    pub fn drop(&mut self, symbol: &str) -> Option<Constant> {
-        let index = self.id.iter().position(|s| s == symbol)?;
-        self.id.remove(index);
-        Some(self.constants.remove(index))
+        self.types.get(index)
     }
 }

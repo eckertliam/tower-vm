@@ -1,8 +1,9 @@
 mod instruction;
 mod machine;
 mod gensym;
-mod constant;
+mod const_type;
 mod const_table;
+
 
 
 #[cfg(test)]

@@ -1,10 +1,10 @@
 use crate::{
     const_table::ConstantTable, 
     instruction::Instruction,
-    constant::{Constant, Type},
+    const_type::ConstType,
 };
 
-use std::{process::{Command, Stdio}, result};
+use std::process::{Command, Stdio};
 use std::io::{self, Write};
 
 pub struct Machine {
@@ -84,48 +84,44 @@ impl Machine {
 
     // pop a symbol from the stack expecting a type
     // if the symbol is not of the expected type, return None
-    fn expect(&mut self, type_: Type) -> Result<String, String> {
+    fn expect(&mut self, type_: ConstType) -> Result<String, String> {
         let symbol = self.pop().ok_or("Stack underflow")?;
-        let constant = self.constants.get(&symbol).unwrap();
-        if constant.get_type() == type_ {
+        let const_t = self.constants.get(&symbol).unwrap();
+        if const_t == &type_ {
             Ok(symbol)
         } else {
-            Err(format!("Expected type {:?} but found {:?}", type_, constant.get_type()))
+            Err(format!("Expected type {:?} but found {:?}", type_, const_t))
         }
     }
 
-    fn push_constant(&mut self, constant: Constant) -> String {
-        self.constants.push(constant)
+    fn push_constant(&mut self, type_: ConstType) -> String {
+        self.constants.push(type_)
     }
 
     fn load_int(&mut self, i: i32) {
-        let symbol = self.push_constant(Constant::I32(i));
+        let symbol = self.push_constant(ConstType::I32);
         self.push(&symbol);
         self.code.push(format!("int {} = {};\n", symbol, i));
     }
 
     fn load_float(&mut self, f: f32) {
-        let symbol = self.push_constant(Constant::F32(f));
+        let symbol = self.push_constant(ConstType::F32);
         self.push(&symbol);
         self.code.push(format!("float {} = {};\n", symbol, f));
     }
 
     fn load_bool(&mut self, b: bool) {
-        let symbol = self.push_constant(Constant::Bool(b));
+        let symbol = self.push_constant(ConstType::Bool);
         self.push(&symbol);
         self.code.push(format!("bool {} = {};\n", symbol, b));
     }
 
-    fn binary_op(&mut self, op: &str, lhs_t: Type, rhs_t: Type, result_type: Type) {
+    fn binary_op(&mut self, op: &str, lhs_t: ConstType, rhs_t: ConstType, result_type: ConstType) {
         let right = self.expect(rhs_t);
         let left = self.expect(lhs_t);
         match (left, right) {
             (Ok(left), Ok(right)) => {
-                let symbol = match result_type {
-                    Type::I32 => self.push_constant(Constant::I32(0)),
-                    Type::F32 => self.push_constant(Constant::F32(0.0)),
-                    Type::Bool => self.push_constant(Constant::Bool(false)),
-                };
+                let symbol = self.push_constant(result_type);
                 let t_str = result_type.to_string();
                 self.code.push(format!("{} {} = {} {} {};\n", t_str, symbol, left, op, right));
                 self.push(&symbol);
@@ -135,149 +131,149 @@ impl Machine {
     }
 
     fn int_add(&mut self) {
-        self.binary_op("+", Type::I32, Type::I32, Type::I32);
+        self.binary_op("+", ConstType::I32, ConstType::I32, ConstType::I32);
     }
 
     fn int_sub(&mut self) {
-        self.binary_op("-", Type::I32, Type::I32, Type::I32)
+        self.binary_op("-", ConstType::I32, ConstType::I32, ConstType::I32)
     }
 
     fn int_mul(&mut self) {
-        self.binary_op("*", Type::I32, Type::I32, Type::I32);
+        self.binary_op("*", ConstType::I32, ConstType::I32, ConstType::I32);
     }
 
     fn int_div(&mut self) {
-        self.binary_op("/", Type::I32, Type::I32, Type::I32);
+        self.binary_op("/", ConstType::I32, ConstType::I32, ConstType::I32);
     }
 
     fn int_mod(&mut self) {
-        self.binary_op("%", Type::I32, Type::I32, Type::I32);
+        self.binary_op("%", ConstType::I32, ConstType::I32, ConstType::I32);
     }
 
     fn int_shl(&mut self) {
-        self.binary_op("<<", Type::I32, Type::I32, Type::I32);
+        self.binary_op("<<", ConstType::I32, ConstType::I32, ConstType::I32);
     }
 
     fn int_shr(&mut self) {
-        self.binary_op(">>", Type::I32, Type::I32, Type::I32);
+        self.binary_op(">>", ConstType::I32, ConstType::I32, ConstType::I32);
     }
 
     fn int_and(&mut self) {
-        self.binary_op("&", Type::I32, Type::I32, Type::I32);
+        self.binary_op("&", ConstType::I32, ConstType::I32, ConstType::I32);
     }
 
     fn int_or(&mut self) {
-        self.binary_op("|", Type::I32, Type::I32, Type::I32);
+        self.binary_op("|", ConstType::I32, ConstType::I32, ConstType::I32);
     }
 
     fn int_xor(&mut self) {
-        self.binary_op("^", Type::I32, Type::I32, Type::I32);
+        self.binary_op("^", ConstType::I32, ConstType::I32, ConstType::I32);
     }
 
     fn int_eq(&mut self) {
-        self.binary_op("==", Type::I32, Type::I32, Type::Bool);
+        self.binary_op("==", ConstType::I32, ConstType::I32, ConstType::Bool);
     }
 
     fn int_neq(&mut self) {
-        self.binary_op("!=", Type::I32, Type::I32, Type::Bool);
+        self.binary_op("!=", ConstType::I32, ConstType::I32, ConstType::Bool);
     }
 
     fn int_lt(&mut self) {
-        self.binary_op("<", Type::I32, Type::I32, Type::Bool);
+        self.binary_op("<", ConstType::I32, ConstType::I32, ConstType::Bool);
     }
 
     fn int_lte(&mut self) {
-        self.binary_op("<=", Type::I32, Type::I32, Type::Bool);
+        self.binary_op("<=", ConstType::I32, ConstType::I32, ConstType::Bool);
     }
 
     fn int_gt(&mut self) {
-        self.binary_op(">", Type::I32, Type::I32, Type::Bool);
+        self.binary_op(">", ConstType::I32, ConstType::I32, ConstType::Bool);
     }
 
     fn int_gte(&mut self) {
-        self.binary_op(">=", Type::I32, Type::I32, Type::Bool);
+        self.binary_op(">=", ConstType::I32, ConstType::I32, ConstType::Bool);
     }
 
 
     fn int_print(&mut self) {
-        let symbol = self.expect(Type::I32).unwrap();
+        let symbol = self.expect(ConstType::I32).unwrap();
         self.code.push(format!("printf(\"%d\\n\", {});\n", symbol));
     }
 
     fn bool_print(&mut self) {
-        let symbol = self.expect(Type::Bool).unwrap();
+        let symbol = self.expect(ConstType::Bool).unwrap();
         self.code.push(format!("printf(\"%s\\n\", {} ? \"true\" : \"false\");\n", symbol));
     }
 
     fn bool_not(&mut self) {
-        let val = self.expect(Type::Bool).unwrap();
-        let symbol = self.push_constant(Constant::Bool(false));
+        let val = self.expect(ConstType::Bool).unwrap();
+        let symbol = self.push_constant(ConstType::Bool);
         self.code.push(format!("bool {} = !{};\n", symbol, val));
         self.push(&symbol);
     }
 
     fn bool_and(&mut self) {
-        self.binary_op("&&", Type::Bool, Type::Bool, Type::Bool);
+        self.binary_op("&&", ConstType::Bool, ConstType::Bool, ConstType::Bool);
     }
 
     fn bool_or(&mut self) {
-        self.binary_op("||", Type::Bool, Type::Bool, Type::Bool);
+        self.binary_op("||", ConstType::Bool, ConstType::Bool, ConstType::Bool);
     }
 
     fn bool_eq(&mut self) {
-        self.binary_op("==", Type::Bool, Type::Bool, Type::Bool);
+        self.binary_op("==", ConstType::Bool, ConstType::Bool, ConstType::Bool);
     }
 
     fn bool_neq(&mut self) {
-        self.binary_op("!=", Type::Bool, Type::Bool, Type::Bool);
+        self.binary_op("!=", ConstType::Bool, ConstType::Bool, ConstType::Bool);
     }
 
     fn float_add(&mut self) {
-        self.binary_op("+", Type::F32, Type::F32, Type::F32);
+        self.binary_op("+", ConstType::F32, ConstType::F32, ConstType::F32);
     }
 
     fn float_sub(&mut self) {
-        self.binary_op("-", Type::F32, Type::F32, Type::F32);
+        self.binary_op("-", ConstType::F32, ConstType::F32, ConstType::F32);
     }
 
     fn float_mul(&mut self) {
-        self.binary_op("*", Type::F32, Type::F32, Type::F32);
+        self.binary_op("*", ConstType::F32, ConstType::F32, ConstType::F32);
     }
 
     fn float_div(&mut self) {
-        self.binary_op("/", Type::F32, Type::F32, Type::F32);
+        self.binary_op("/", ConstType::F32, ConstType::F32, ConstType::F32);
     }
 
     fn float_mod(&mut self) {
-        self.binary_op("%", Type::F32, Type::F32, Type::F32);
+        self.binary_op("%", ConstType::F32, ConstType::F32, ConstType::F32);
     }
 
     fn float_eq(&mut self) {
-        self.binary_op("==", Type::F32, Type::F32, Type::Bool);
+        self.binary_op("==", ConstType::F32, ConstType::F32, ConstType::Bool);
     }
 
     fn float_neq(&mut self) {
-        self.binary_op("!=", Type::F32, Type::F32, Type::Bool);
+        self.binary_op("!=", ConstType::F32, ConstType::F32, ConstType::Bool);
     }
 
     fn float_lt(&mut self) {
-        self.binary_op("<", Type::F32, Type::F32, Type::Bool);
+        self.binary_op("<", ConstType::F32, ConstType::F32, ConstType::Bool);
     }
 
     fn float_gt(&mut self) {
-        self.binary_op(">", Type::F32, Type::F32, Type::Bool);
+        self.binary_op(">", ConstType::F32, ConstType::F32, ConstType::Bool);
     }
 
     fn float_leq(&mut self) {
-        self.binary_op("<=", Type::F32, Type::F32, Type::Bool);
+        self.binary_op("<=", ConstType::F32, ConstType::F32, ConstType::Bool);
     }
 
     fn float_geq(&mut self) {
-        self.binary_op(">=", Type::F32, Type::F32, Type::Bool);
+        self.binary_op(">=", ConstType::F32, ConstType::F32, ConstType::Bool);
     }
 
     fn float_print(&mut self) {
-        let value = self.expect(Type::F32);
+        let value = self.expect(ConstType::F32);
         match value {
             Ok(value) => {
                 self.code.push(format!("printf(\"%f\\n\", {});\n", value));
@@ -287,7 +283,7 @@ impl Machine {
     }
 
     fn bool_if(&mut self, block: Vec<Instruction>) {
-        let cond = self.expect(Type::Bool);
+        let cond = self.expect(ConstType::Bool);
         match cond {
             Ok(cond) => {
                 self.code.push(format!("if ({}) {{\n", cond));
