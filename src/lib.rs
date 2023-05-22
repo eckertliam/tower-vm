@@ -3,7 +3,7 @@ mod machine;
 mod gensym;
 mod const_type;
 mod const_table;
-
+mod const_fold;
 
 
 #[cfg(test)]
