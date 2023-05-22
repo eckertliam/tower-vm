@@ -2,6 +2,7 @@ use crate::{
     const_table::ConstantTable, 
     instruction::Instruction,
     const_type::ConstType,
+    const_fold::fold_consts,
 };
 
 use std::process::{Command, Stdio};
@@ -30,19 +31,26 @@ impl Machine {
         self.code.clone()
     }
 
-    pub fn compile(&mut self, instrs: Vec<Instruction>) {
+    pub fn compile(&mut self, instrs: Vec<Instruction>, run: bool, emit: bool, keep_src: bool) {
         self.load_instrs(instrs);
         self.run();
         let code = self.assemble();
         // create temporary file
-        let fpath = "/tmp/temp.c";
+        let mut fpath = "/tmp/temp.c";
+        if keep_src {
+            fpath = "./exec.c";
+        }
         let mut file = std::fs::File::create(fpath).unwrap();
         file.write_all(code.as_bytes()).unwrap();
+        let mut exec_name = "/tmp/temp".to_string();
+        if emit {
+            exec_name = "./exec".to_string();
+        }
         // compile temporary file
         let output = Command::new("cc")
             .arg(fpath)
             .arg("-o")
-            .arg("/tmp/temp")
+            .arg(&exec_name)
             .output()
             .expect("failed to execute process");
         if !output.status.success() {
@@ -50,22 +58,24 @@ impl Machine {
             io::stderr().write_all(&output.stderr).unwrap();
             panic!("failed to compile");
         }
-        // execute temporary file
-        let output = Command::new("/tmp/temp")
-            .stdout(Stdio::piped())
-            .output()
-            .expect("failed to execute process");
-        if !output.status.success() {
+        if run {
+            // execute temporary file
+            let output = Command::new(exec_name)
+                .stdout(Stdio::piped())
+                .output()
+                .expect("failed to execute process");
+            if !output.status.success() {
+                io::stdout().write_all(&output.stdout).unwrap();
+                io::stderr().write_all(&output.stderr).unwrap();
+                panic!("failed to execute");
+            }
+            // print output
             io::stdout().write_all(&output.stdout).unwrap();
-            io::stderr().write_all(&output.stderr).unwrap();
-            panic!("failed to execute");
         }
-        // print output
-        io::stdout().write_all(&output.stdout).unwrap();
     }
     
     pub fn load_instrs(&mut self, instrs: Vec<Instruction>) {
-        self.instrs = instrs;
+        self.instrs = fold_consts(instrs);
     }
 
     pub fn assemble(&mut self) -> String {

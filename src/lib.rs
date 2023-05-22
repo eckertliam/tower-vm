@@ -2,8 +2,8 @@ mod const_fold;
 mod const_table;
 mod const_type;
 mod gensym;
-mod instruction;
-mod machine;
+pub mod instruction;
+pub mod machine;
 
 #[cfg(test)]
 mod tests {
