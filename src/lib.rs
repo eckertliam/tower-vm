@@ -44,4 +44,17 @@ mod tests {
         let folded = fold_consts(code);
         assert_eq!(folded, vec![Instruction::ILoad(6),]);
     }
+
+    #[test]
+    fn test_bool_fold() {
+        let code = vec![
+            Instruction::BLoad(true),
+            Instruction::BNot,
+            Instruction::BLoad(false),
+            Instruction::BEq,
+            Instruction::BPrint,
+        ];
+        let folded = fold_consts(code);
+        assert_eq!(folded, vec![Instruction::BLoad(true), Instruction::BPrint]);
+    }
 }
