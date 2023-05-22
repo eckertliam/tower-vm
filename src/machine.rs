@@ -26,6 +26,10 @@ impl Machine {
         }
     }
 
+    pub fn get_code(&self) -> Vec<String> {
+        self.code.clone()
+    }
+
     pub fn compile(&mut self, instrs: Vec<Instruction>) {
         self.load_instrs(instrs);
         self.run();
@@ -67,10 +71,7 @@ impl Machine {
     pub fn assemble(&mut self) -> String {
         self.run();
         let body = self.code.join("");
-        let header = "#include <stdio.h>\n
-                      #include <stdbool.h>\n
-                      #include <stdint.h>\n
-                      #include <inttypes.h>\n";
+        let header = "#include <stdio.h>\n#include <stdbool.h>\n#include <stdint.h>\n#include <inttypes.h>\n";
         format!("{} int main() {{\n{}\n}}", header, body)
     }
 
