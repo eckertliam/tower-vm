@@ -1,8 +1,15 @@
 [package]
-name = "spice"
+name = "tower-vm"
 version = "0.1.0"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+
+
+[description]
+description = "A VM that emits fast efficient C code"
+
+[license]
+license = "Apache-2.0"
