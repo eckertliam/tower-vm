@@ -45,17 +45,17 @@ pub fn fold_consts(code: Vec<Instruction>) -> Vec<Instruction> {
     let mut i = 0;
     let len = code.len();
     while i < len {
-        if i + 3 <= len {
-            if let Some(folded) = fold_slice(&code[i..i + 3]) {
-                new_code.push(folded);
-                i += 3;
-                continue;
-            }
-        }
         if i + 2 <= len {
             if let Some(folded) = fold_slice(&code[i..i + 2]) {
                 new_code.push(folded);
                 i += 2;
+                continue;
+            }
+        }
+        if i + 3 <= len {
+            if let Some(folded) = fold_slice(&code[i..i + 3]) {
+                new_code.push(folded);
+                i += 3;
                 continue;
             }
         }
