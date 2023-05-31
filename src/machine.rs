@@ -14,6 +14,7 @@ pub struct Machine {
     code: Vec<String>,
     instrs: Vec<Instruction>,
     ip: usize,
+    func_table: Vec<(String, Vec<Instruction>)>,// stores function name and optimized instructions for funcall inlining
 }
 
 impl Machine {
@@ -24,6 +25,7 @@ impl Machine {
             code: Vec::new(),
             instrs: Vec::new(),
             ip: 0,
+            func_table: Vec::new(),
         }
     }
 
@@ -314,6 +316,40 @@ impl Machine {
         }
     }
 
+    // write function to function table
+    // fold constants in function
+    fn defun(&mut self, name: &str, block: Vec<Instruction>) {
+        let new_block = fold_consts(block);
+        self.func_table.push((name.to_string(), new_block));
+    }
+
+    // call function
+    // look up function in function table
+    // evaluate function block the same way as if block
+    fn funcall(&mut self, name: &str) {
+        let mut found: u8 = 0;
+        // find the function in the function table
+        for (func_name, block) in self.func_table.clone() {
+            if func_name == name {
+                found = 1;
+                // determine the length of the stack before the block is evaluated
+                let len = self.stack.len();
+                // evaluate the block
+                for instr in block {
+                    self.eval(&instr);
+                }
+                // pop the stack until it is the same length as before the block was evaluated
+                while self.stack.len() > len {
+                    self.pop();
+                }
+            }
+        }
+        if found == 0 {
+            panic!("Function {} not found", name);
+        }
+    }
+
+    // dispatches the instruction to the appropriate function
     fn eval(&mut self, instr: &Instruction) {
         match instr {
             Instruction::ILoad(i) => self.load_int(*i),
@@ -355,10 +391,12 @@ impl Machine {
             Instruction::FGte => self.float_geq(),
             Instruction::FPrint => self.float_print(),
             Instruction::BIf(block) => self.bool_if(block.clone()),
-            _ => panic!("unimplemented {:?}", instr),
+            Instruction::Defun(ident, block) => self.defun(&ident, block.clone()),
+            Instruction::Funcall(ident) => self.funcall(&ident),
         }
     }
 
+    // iterate through the instructions and evaluate them
     pub fn run(&mut self) {
         while self.ip < self.instrs.len() {
             let instr = self.instrs[self.ip].clone();

@@ -14,8 +14,8 @@ abstrack stack machine that spits out optimized C code. Tower can also compile a
 - [x] Support int and float assignments
 - [x] Support boolean operations
 - [x] Support if statements
-- [ ] Support for functions
-- [ ] Support for function calls
+- [x] Support for functions
+- [x] Support for function calls
 - [ ] Support while loops
 - [ ] Support collections
 - [ ] Support chars

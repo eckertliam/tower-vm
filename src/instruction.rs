@@ -46,4 +46,8 @@ pub enum Instruction {
     BNeq,
     BPrint,
     BIf(Vec<Instruction>),
+
+    // Function Definition
+    Defun(String, Vec<Instruction>),
+    Funcall(String),
 }

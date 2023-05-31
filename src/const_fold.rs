@@ -59,6 +59,14 @@ pub fn fold_consts(code: Vec<Instruction>) -> Vec<Instruction> {
                 continue;
             }
         }
+        if let Instruction::BIf(sub) = &code[i] {
+            if let Some(folded) = fold_slice(sub) {
+                new_code.push(Instruction::BIf(vec![folded]));
+                i += 1;
+                continue;
+            }
+        }
+        
         new_code.push(code[i].clone());
         i += 1;
     }

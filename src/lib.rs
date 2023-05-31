@@ -2,8 +2,9 @@ mod const_fold;
 mod const_table;
 mod const_type;
 mod gensym;
-pub mod instruction;
-pub mod machine;
+mod instruction;
+mod machine;
+
 
 #[cfg(test)]
 mod tests {
@@ -56,5 +57,17 @@ mod tests {
         ];
         let folded = fold_consts(code);
         assert_eq!(folded, vec![Instruction::BLoad(true), Instruction::BPrint]);
+    }
+
+    #[test]
+    fn test_funcall() {
+        let mut machine = Machine::new();
+        let instr = vec![
+            Instruction::Defun("foo".to_string(), vec![Instruction::ILoad(4), Instruction::IAdd]),
+            Instruction::ILoad(1),
+            Instruction::Funcall("foo".to_string()),
+            Instruction::IPrint,
+        ];
+        machine.compile(instr, true, true, true);
     }
 }
