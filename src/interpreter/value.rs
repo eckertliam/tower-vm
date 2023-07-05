@@ -223,6 +223,312 @@ impl TryInto<f64> for Value {
     }
 }
 
+impl std::ops::Add for Value {
+    type Output = Self;
+
+    fn add(self, rhs: Self) -> Self::Output {
+        use TypeFlag::*;
+        match (self.ty, rhs.ty) {
+            (I8, I8) => {
+                let lhs: i8 = self.try_into().unwrap();
+                let rhs: i8 = rhs.try_into().unwrap();
+                (lhs + rhs).into()
+            }
+            (I16, I16) => {
+                let lhs: i16 = self.try_into().unwrap();
+                let rhs: i16 = rhs.try_into().unwrap();
+                (lhs + rhs).into()
+            }
+            (I32, I32) => {
+                let lhs: i32 = self.try_into().unwrap();
+                let rhs: i32 = rhs.try_into().unwrap();
+                (lhs + rhs).into()
+            }
+            (I64, I64) => {
+                let lhs: i64 = self.try_into().unwrap();
+                let rhs: i64 = rhs.try_into().unwrap();
+                (lhs + rhs).into()
+            }
+            (U8, U8) => {
+                let lhs: u8 = self.try_into().unwrap();
+                let rhs: u8 = rhs.try_into().unwrap();
+                (lhs + rhs).into()
+            }
+            (U16, U16) => {
+                let lhs: u16 = self.try_into().unwrap();
+                let rhs: u16 = rhs.try_into().unwrap();
+                (lhs + rhs).into()
+            }
+            (U32, U32) => {
+                let lhs: u32 = self.try_into().unwrap();
+                let rhs: u32 = rhs.try_into().unwrap();
+                (lhs + rhs).into()
+            }
+            (U64, U64) => {
+                let lhs: u64 = self.try_into().unwrap();
+                let rhs: u64 = rhs.try_into().unwrap();
+                (lhs + rhs).into()
+            }
+            (F32, F32) => {
+                let lhs: f32 = self.try_into().unwrap();
+                let rhs: f32 = rhs.try_into().unwrap();
+                (lhs + rhs).into()
+            }
+            (F64, F64) => {
+                let lhs: f64 = self.try_into().unwrap();
+                let rhs: f64 = rhs.try_into().unwrap();
+                (lhs + rhs).into()
+            }
+            _ => panic!("invalid types"),
+        }
+    }
+}
+
+impl std::ops::Sub for Value {
+    type Output = Self;
+
+    fn sub(self, rhs: Self) -> Self::Output {
+        use TypeFlag::*;
+        match (self.ty, rhs.ty) {
+            (I8, I8) => {
+                let lhs: i8 = self.try_into().unwrap();
+                let rhs: i8 = rhs.try_into().unwrap();
+                (lhs - rhs).into()
+            }
+            (I16, I16) => {
+                let lhs: i16 = self.try_into().unwrap();
+                let rhs: i16 = rhs.try_into().unwrap();
+                (lhs - rhs).into()
+            }
+            (I32, I32) => {
+                let lhs: i32 = self.try_into().unwrap();
+                let rhs: i32 = rhs.try_into().unwrap();
+                (lhs - rhs).into()
+            }
+            (I64, I64) => {
+                let lhs: i64 = self.try_into().unwrap();
+                let rhs: i64 = rhs.try_into().unwrap();
+                (lhs - rhs).into()
+            }
+            (U8, U8) => {
+                let lhs: u8 = self.try_into().unwrap();
+                let rhs: u8 = rhs.try_into().unwrap();
+                (lhs - rhs).into()
+            }
+            (U16, U16) => {
+                let lhs: u16 = self.try_into().unwrap();
+                let rhs: u16 = rhs.try_into().unwrap();
+                (lhs - rhs).into()
+            }
+            (U32, U32) => {
+                let lhs: u32 = self.try_into().unwrap();
+                let rhs: u32 = rhs.try_into().unwrap();
+                (lhs - rhs).into()
+            }
+            (U64, U64) => {
+                let lhs: u64 = self.try_into().unwrap();
+                let rhs: u64 = rhs.try_into().unwrap();
+                (lhs - rhs).into()
+            }
+            (F32, F32) => {
+                let lhs: f32 = self.try_into().unwrap();
+                let rhs: f32 = rhs.try_into().unwrap();
+                (lhs - rhs).into()
+            }
+            (F64, F64) => {
+                let lhs: f64 = self.try_into().unwrap();
+                let rhs: f64 = rhs.try_into().unwrap();
+                (lhs - rhs).into()
+            }
+            _ => panic!("invalid types"),
+        }
+    }
+}
+
+impl std::ops::Mul for Value {
+    type Output = Self;
+
+    fn mul(self, rhs: Self) -> Self::Output {
+        use TypeFlag::*;
+        match (self.ty, rhs.ty) {
+            (I8, I8) => {
+                let lhs: i8 = self.try_into().unwrap();
+                let rhs: i8 = rhs.try_into().unwrap();
+                (lhs * rhs).into()
+            }
+            (I16, I16) => {
+                let lhs: i16 = self.try_into().unwrap();
+                let rhs: i16 = rhs.try_into().unwrap();
+                (lhs * rhs).into()
+            }
+            (I32, I32) => {
+                let lhs: i32 = self.try_into().unwrap();
+                let rhs: i32 = rhs.try_into().unwrap();
+                (lhs * rhs).into()
+            }
+            (I64, I64) => {
+                let lhs: i64 = self.try_into().unwrap();
+                let rhs: i64 = rhs.try_into().unwrap();
+                (lhs * rhs).into()
+            }
+            (U8, U8) => {
+                let lhs: u8 = self.try_into().unwrap();
+                let rhs: u8 = rhs.try_into().unwrap();
+                (lhs * rhs).into()
+            }
+            (U16, U16) => {
+                let lhs: u16 = self.try_into().unwrap();
+                let rhs: u16 = rhs.try_into().unwrap();
+                (lhs * rhs).into()
+            }
+            (U32, U32) => {
+                let lhs: u32 = self.try_into().unwrap();
+                let rhs: u32 = rhs.try_into().unwrap();
+                (lhs * rhs).into()
+            }
+            (U64, U64) => {
+                let lhs: u64 = self.try_into().unwrap();
+                let rhs: u64 = rhs.try_into().unwrap();
+                (lhs * rhs).into()
+            }
+            (F32, F32) => {
+                let lhs: f32 = self.try_into().unwrap();
+                let rhs: f32 = rhs.try_into().unwrap();
+                (lhs * rhs).into()
+            }
+            (F64, F64) => {
+                let lhs: f64 = self.try_into().unwrap();
+                let rhs: f64 = rhs.try_into().unwrap();
+                (lhs * rhs).into()
+            }
+            _ => panic!("invalid types"),
+        }
+    }
+}
+
+impl std::ops::Div for Value {
+    type Output = Self;
+
+    fn div(self, rhs: Self) -> Self::Output {
+        use TypeFlag::*;
+
+        match (self.ty, rhs.ty) {
+            (I8, I8) => {
+                let lhs: i8 = self.try_into().unwrap();
+                let rhs: i8 = rhs.try_into().unwrap();
+                (lhs / rhs).into()
+            }
+            (I16, I16) => {
+                let lhs: i16 = self.try_into().unwrap();
+                let rhs: i16 = rhs.try_into().unwrap();
+                (lhs / rhs).into()
+            }
+            (I32, I32) => {
+                let lhs: i32 = self.try_into().unwrap();
+                let rhs: i32 = rhs.try_into().unwrap();
+                (lhs / rhs).into()
+            }
+            (I64, I64) => {
+                let lhs: i64 = self.try_into().unwrap();
+                let rhs: i64 = rhs.try_into().unwrap();
+                (lhs / rhs).into()
+            }
+            (U8, U8) => {
+                let lhs: u8 = self.try_into().unwrap();
+                let rhs: u8 = rhs.try_into().unwrap();
+                (lhs / rhs).into()
+            }
+            (U16, U16) => {
+                let lhs: u16 = self.try_into().unwrap();
+                let rhs: u16 = rhs.try_into().unwrap();
+                (lhs / rhs).into()
+            }
+            (U32, U32) => {
+                let lhs: u32 = self.try_into().unwrap();
+                let rhs: u32 = rhs.try_into().unwrap();
+                (lhs / rhs).into()
+            }
+            (U64, U64) => {
+                let lhs: u64 = self.try_into().unwrap();
+                let rhs: u64 = rhs.try_into().unwrap();
+                (lhs / rhs).into()
+            }
+            (F32, F32) => {
+                let lhs: f32 = self.try_into().unwrap();
+                let rhs: f32 = rhs.try_into().unwrap();
+                (lhs / rhs).into()
+            }
+            (F64, F64) => {
+                let lhs: f64 = self.try_into().unwrap();
+                let rhs: f64 = rhs.try_into().unwrap();
+                (lhs / rhs).into()
+            }
+            _ => panic!("invalid types"),
+        }
+    }
+}
+
+impl std::ops::Rem for Value {
+    type Output = Self;
+
+    fn rem(self, rhs: Self) -> Self::Output {
+        use TypeFlag::*;
+        match (self.ty, rhs.ty) {
+            (I8, I8) => {
+                let lhs: i8 = self.try_into().unwrap();
+                let rhs: i8 = rhs.try_into().unwrap();
+                (lhs % rhs).into()
+            }
+            (I16, I16) => {
+                let lhs: i16 = self.try_into().unwrap();
+                let rhs: i16 = rhs.try_into().unwrap();
+                (lhs % rhs).into()
+            }
+            (I32, I32) => {
+                let lhs: i32 = self.try_into().unwrap();
+                let rhs: i32 = rhs.try_into().unwrap();
+                (lhs % rhs).into()
+            }
+            (I64, I64) => {
+                let lhs: i64 = self.try_into().unwrap();
+                let rhs: i64 = rhs.try_into().unwrap();
+                (lhs % rhs).into()
+            }
+            (U8, U8) => {
+                let lhs: u8 = self.try_into().unwrap();
+                let rhs: u8 = rhs.try_into().unwrap();
+                (lhs % rhs).into()
+            }
+            (U16, U16) => {
+                let lhs: u16 = self.try_into().unwrap();
+                let rhs: u16 = rhs.try_into().unwrap();
+                (lhs % rhs).into()
+            }
+            (U32, U32) => {
+                let lhs: u32 = self.try_into().unwrap();
+                let rhs: u32 = rhs.try_into().unwrap();
+                (lhs % rhs).into()
+            }
+            (U64, U64) => {
+                let lhs: u64 = self.try_into().unwrap();
+                let rhs: u64 = rhs.try_into().unwrap();
+                (lhs % rhs).into()
+            }
+            (F32, F32) => {
+                let lhs: f32 = self.try_into().unwrap();
+                let rhs: f32 = rhs.try_into().unwrap();
+                (lhs % rhs).into()
+            }
+            (F64, F64) => {
+                let lhs: f64 = self.try_into().unwrap();
+                let rhs: f64 = rhs.try_into().unwrap();
+                (lhs % rhs).into()
+            }
+            _ => panic!("invalid types"),
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -393,5 +699,432 @@ mod tests {
         let stack_pop = Value::from_stack(TypeFlag::U64, stack_push);
         let prim_test: u64 = stack_pop.try_into().unwrap();
         assert_eq!(prim_test, init);
+    }
+
+    // std::ops tests
+    // add steps:
+    // 1. create two values lhs and rhs
+    // 2. create a value called expected that is the known result of lhs + rhs
+    // 3. create a value called actual that is lhs + rhs
+    // 4. assert that expected == actual
+    #[test]
+    fn test_i8_add() {
+        let lhs = Value::from(5i8);
+        let rhs = Value::from(120i8);
+        let expected = Value::from(125i8);
+        let actual = lhs + rhs;
+        assert_eq!(expected, actual);
+    }
+
+    #[test]
+    fn test_i16_add() {
+        let lhs = Value::from(1500i16);
+        let rhs = Value::from(2001i16);
+        let expected = Value::from(3501i16);
+        let actual = lhs + rhs;
+        assert_eq!(expected, actual);
+    }
+
+    #[test]
+    fn test_i32_add() {
+        let lhs = Value::from(1500i32);
+        let rhs = Value::from(2001i32);
+        let expected = Value::from(3501i32);
+        let actual = lhs + rhs;
+        assert_eq!(expected, actual);
+    }
+
+    #[test]
+    fn test_i64_add() {
+        let lhs = Value::from(1500i64);
+        let rhs = Value::from(2001i64);
+        let expected = Value::from(3501i64);
+        let actual = lhs + rhs;
+        assert_eq!(expected, actual);
+    }
+
+    #[test]
+    fn test_f32_add() {
+        let lhs = Value::from(std::f32::consts::PI);
+        let rhs = Value::from(0.000002f32);
+        let expected = Value::from(std::f32::consts::PI + 0.000002);
+        let actual = lhs + rhs;
+        assert_eq!(expected, actual);
+    }
+
+    #[test]
+    fn test_f64_add() {
+        let lhs = Value::from(std::f64::consts::PI);
+        let rhs = Value::from(1.3456f64);
+        let expected = Value::from(std::f64::consts::PI + 1.3456);
+        let actual = lhs + rhs;
+        assert_eq!(expected, actual);
+    }
+
+    // std::ops::Sub tests
+
+    #[test]
+    fn test_i8_sub() {
+        let lhs = Value::from(1i8);
+        let rhs = Value::from(2i8);
+        let expected = Value::from(-1i8);
+        let actual = lhs - rhs;
+        assert_eq!(expected, actual);
+    }
+
+    #[test]
+    fn test_i16_sub() {
+        let lhs = Value::from(1500i16);
+        let rhs = Value::from(2001i16);
+        let expected = Value::from(1500i16 - 2001i16);
+        let actual = lhs - rhs;
+        assert_eq!(expected, actual);
+    }
+
+    #[test]
+    fn test_i32_sub() {
+        let lhs = Value::from(1500i32);
+        let rhs = Value::from(2001i32);
+        let expected = Value::from(1500i32 - 2001i32);
+        let actual = lhs - rhs;
+        assert_eq!(expected, actual);
+    }
+
+    #[test]
+    fn test_i64_sub() {
+        let lhs = Value::from(1500i64);
+        let rhs = Value::from(2001i64);
+        let expected = Value::from(1500i64 - 2001i64);
+        let actual = lhs - rhs;
+        assert_eq!(expected, actual);
+    }
+
+    #[test]
+    fn test_f32_sub() {
+        let lhs = Value::from(std::f32::consts::PI);
+        let rhs = Value::from(0.000002f32);
+        let expected = Value::from(std::f32::consts::PI - 0.000002);
+        let actual = lhs - rhs;
+        assert_eq!(expected, actual);
+    }
+
+    #[test]
+    fn test_f64_sub() {
+        let lhs = Value::from(std::f64::consts::PI);
+        let rhs = Value::from(1.3456f64);
+        let expected = Value::from(std::f64::consts::PI - 1.3456);
+        let actual = lhs - rhs;
+        assert_eq!(expected, actual);
+    }
+
+    #[test]
+    fn test_u8_sub() {
+        let lhs = Value::from(240u8);
+        let rhs = Value::from(2u8);
+        let expected = Value::from(238u8);
+        let actual = lhs - rhs;
+        assert_eq!(expected, actual);
+    }
+
+    #[test]
+    fn test_u16_sub() {
+        let lhs = Value::from(1800u16);
+        let rhs = Value::from(1005u16);
+        let expected = Value::from(1800u16 - 1005u16);
+        let actual = lhs - rhs;
+        assert_eq!(expected, actual);
+    }
+
+    #[test]
+    fn test_u32_sub() {
+        let lhs = Value::from(1800u32);
+        let rhs = Value::from(1005u32);
+        let expected = Value::from(1800u32 - 1005u32);
+        let actual = lhs - rhs;
+        assert_eq!(expected, actual);
+    }
+
+    #[test]
+    fn test_u64_sub() {
+        let lhs = Value::from(1800u64);
+        let rhs = Value::from(1005u64);
+        let expected = Value::from(1800u64 - 1005u64);
+        let actual = lhs - rhs;
+        assert_eq!(expected, actual);
+    }
+
+    // std::ops::Mul tests
+    #[test]
+    fn test_i8_mul() {
+        let lhs = Value::from(5i8);
+        let rhs = Value::from(5i8);
+        let expected = Value::from(25i8);
+        let actual = lhs * rhs;
+        assert_eq!(expected, actual);
+    }
+
+    #[test]
+    fn test_i16_mul() {
+        let lhs = Value::from(10i16);
+        let rhs = Value::from(20i16);
+        let expected = Value::from(200i16);
+        let actual = lhs * rhs;
+        assert_eq!(expected, actual);
+    }
+
+    #[test]
+    fn test_i32_mul() {
+        let lhs = Value::from(8i32);
+        let rhs = Value::from(4i32);
+        let expected = Value::from(32i32);
+        let actual = lhs * rhs;
+        assert_eq!(expected, actual);
+    }
+
+    #[test]
+    fn test_i64_mul() {
+        let lhs = Value::from(100i64);
+        let rhs = Value::from(50i64);
+        let expected = Value::from(5000i64);
+        let actual = lhs * rhs;
+        assert_eq!(expected, actual);
+    }
+
+    #[test]
+    fn test_f32_mul() {
+        let lhs = Value::from(2.5f32);
+        let rhs = Value::from(1.5f32);
+        let expected = Value::from(3.75f32);
+        let actual = lhs * rhs;
+        assert_eq!(expected, actual);
+    }
+
+    #[test]
+    fn test_f64_mul() {
+        let lhs = Value::from(3.14f64);
+        let rhs = Value::from(2.5f64);
+        let expected = Value::from((3.14 * 2.5) as f64);
+        let actual = lhs * rhs;
+        assert_eq!(expected, actual);
+    }
+
+    #[test]
+    fn test_u8_mul() {
+        let lhs = Value::from(5u8);
+        let rhs = Value::from(3u8);
+        let expected = Value::from(15u8);
+        let actual = lhs * rhs;
+        assert_eq!(expected, actual);
+    }
+
+    #[test]
+    fn test_u16_mul() {
+        let lhs = Value::from(100u16);
+        let rhs = Value::from(10u16);
+        let expected = Value::from(1000u16);
+        let actual = lhs * rhs;
+        assert_eq!(expected, actual);
+    }
+
+    #[test]
+    fn test_u32_mul() {
+        let lhs = Value::from(8u32);
+        let rhs = Value::from(4u32);
+        let expected = Value::from(32u32);
+        let actual = lhs * rhs;
+        assert_eq!(expected, actual);
+    }
+
+    #[test]
+    fn test_u64_mul() {
+        let lhs = Value::from(100u64);
+        let rhs = Value::from(50u64);
+        let expected = Value::from(5000u64);
+        let actual = lhs * rhs;
+        assert_eq!(expected, actual);
+    }
+
+    // std::ops::Div tests
+
+    #[test]
+    fn test_i8_div() {
+        let lhs = Value::from(10i8);
+        let rhs = Value::from(2i8);
+        let expected = Value::from(5i8);
+        let actual = lhs / rhs;
+        assert_eq!(expected, actual);
+    }
+
+    #[test]
+    fn test_i16_div() {
+        let lhs = Value::from(100i16);
+        let rhs = Value::from(20i16);
+        let expected = Value::from(5i16);
+        let actual = lhs / rhs;
+        assert_eq!(expected, actual);
+    }
+
+    #[test]
+    fn test_i32_div() {
+        let lhs = Value::from(50i32);
+        let rhs = Value::from(5i32);
+        let expected = Value::from(10i32);
+        let actual = lhs / rhs;
+        assert_eq!(expected, actual);
+    }
+
+    #[test]
+    fn test_i64_div() {
+        let lhs = Value::from(100i64);
+        let rhs = Value::from(10i64);
+        let expected = Value::from(10i64);
+        let actual = lhs / rhs;
+        assert_eq!(expected, actual);
+    }
+
+    #[test]
+    fn test_f32_div() {
+        let lhs = Value::from(7.5f32);
+        let rhs = Value::from(2.5f32);
+        let expected = Value::from(3.0f32);
+        let actual = lhs / rhs;
+        assert_eq!(expected, actual);
+    }
+
+    #[test]
+    fn test_f64_div() {
+        let lhs = Value::from(12.6f64);
+        let rhs = Value::from(2.0f64);
+        let expected = Value::from(6.3f64);
+        let actual = lhs / rhs;
+        assert_eq!(expected, actual);
+    }
+
+    #[test]
+    fn test_u8_div() {
+        let lhs = Value::from(20u8);
+        let rhs = Value::from(5u8);
+        let expected = Value::from(4u8);
+        let actual = lhs / rhs;
+        assert_eq!(expected, actual);
+    }
+
+    #[test]
+    fn test_u16_div() {
+        let lhs = Value::from(100u16);
+        let rhs = Value::from(20u16);
+        let expected = Value::from(5u16);
+        let actual = lhs / rhs;
+        assert_eq!(expected, actual);
+    }
+
+    #[test]
+    fn test_u32_div() {
+        let lhs = Value::from(50u32);
+        let rhs = Value::from(5u32);
+        let expected = Value::from(10u32);
+        let actual = lhs / rhs;
+        assert_eq!(expected, actual);
+    }
+
+    #[test]
+    fn test_u64_div() {
+        let lhs = Value::from(100u64);
+        let rhs = Value::from(10u64);
+        let expected = Value::from(10u64);
+        let actual = lhs / rhs;
+        assert_eq!(expected, actual);
+    }
+
+    // std::ops::Rem tests
+
+    #[test]
+    fn test_i8_rem() {
+        let lhs = Value::from(10i8);
+        let rhs = Value::from(3i8);
+        let expected = Value::from(1i8);
+        let actual = lhs % rhs;
+        assert_eq!(expected, actual);
+    }
+
+    #[test]
+    fn test_i16_rem() {
+        let lhs = Value::from(100i16);
+        let rhs = Value::from(30i16);
+        let expected = Value::from(10i16);
+        let actual = lhs % rhs;
+        assert_eq!(expected, actual);
+    }
+
+    #[test]
+    fn test_i32_rem() {
+        let lhs = Value::from(50i32);
+        let rhs = Value::from(7i32);
+        let expected = Value::from(1i32);
+        let actual = lhs % rhs;
+        assert_eq!(expected, actual);
+    }
+
+    #[test]
+    fn test_i64_rem() {
+        let lhs = Value::from(100i64);
+        let rhs = Value::from(15i64);
+        let expected = Value::from(10i64);
+        let actual = lhs % rhs;
+        assert_eq!(expected, actual);
+    }
+
+    #[test]
+    fn test_u8_rem() {
+        let lhs = Value::from(20u8);
+        let rhs = Value::from(7u8);
+        let expected = Value::from(6u8);
+        let actual = lhs % rhs;
+        assert_eq!(expected, actual);
+    }
+
+    #[test]
+    fn test_u16_rem() {
+        let lhs = Value::from(100u16);
+        let rhs = Value::from(30u16);
+        let expected = Value::from(10u16);
+        let actual = lhs % rhs;
+        assert_eq!(expected, actual);
+    }
+
+    #[test]
+    fn test_u32_rem() {
+        let lhs = Value::from(50u32);
+        let rhs = Value::from(7u32);
+        let expected = Value::from(1u32);
+        let actual = lhs % rhs;
+        assert_eq!(expected, actual);
+    }
+
+    #[test]
+    fn test_u64_rem() {
+        let lhs = Value::from(100u64);
+        let rhs = Value::from(15u64);
+        let expected = Value::from(10u64);
+        let actual = lhs % rhs;
+        assert_eq!(expected, actual);
+    }
+
+    #[test]
+    fn test_f32_rem() {
+        let lhs = Value::from(7.5f32);
+        let rhs = Value::from(2.5f32);
+        let expected = Value::from(0.0f32);
+        let actual = lhs % rhs;
+        assert_eq!(expected, actual);
+    }
+
+    #[test]
+    fn test_f64_rem() {
+        let lhs = Value::from(12.6f64);
+        let rhs = Value::from(2.0f64);
+        let expected = Value::from((12.6 % 2.0) as f64);
+        let actual = lhs % rhs;
+        assert_eq!(expected, actual);
     }
 }
