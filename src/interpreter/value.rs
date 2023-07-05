@@ -28,6 +28,12 @@ impl Into<u8> for TypeFlag {
     }
 }
 
+impl Into<u64> for TypeFlag {
+    fn into(self) -> u64 {
+        self as u64
+    }
+}
+
 impl From<u8> for TypeFlag {
     fn from(byte: u8) -> Self {
         match byte {
@@ -88,6 +94,14 @@ impl Value {
             ty,
             data: u64::from_le_bytes(data),
         }
+    }
+
+    pub fn to_stack(self) -> u64 {
+        self.data
+    }
+
+    pub fn from_stack(ty: TypeFlag, stack: u64) -> Self {
+        Self { ty, data: stack }
     }
 }
 
@@ -219,11 +233,11 @@ mod tests {
     // 2. convert to value
     // 3. convert to [u8] using to_code() (this is used when values are inlined in the bytecode)
     // 4. convert to value using from_code() (this is used when values are take from bytecode then pushed to the stack)
-    // 5. declare variable prim_test and convert the value back to the primitive type
-    // 6. assert that prim_test is equal to the original value
+    // 5. convert to u64 using to_stack() (this is used when values are pushed to the stack)
+    // 6. convert back to value with from_stack() and a type flag (this is used when values are popped from the stack)
+    // 7. convert back to primitive value
+    // 8. assert that the primitive value is equal to the initial value
     // lossless conversions.
-
-
 
     #[test]
     fn test_i8_lifecycle() {
@@ -231,117 +245,153 @@ mod tests {
         let value = Value::from(init);
         let code: &[u8] = &value.to_code()[2..]; // drop the type flag
         let decode = Value::from_code(TypeFlag::I8, code);
-        let prim_test: i8 = decode.try_into().unwrap();
+        let stack_push = decode.to_stack();
+        let stack_pop = Value::from_stack(TypeFlag::I8, stack_push);
+        let prim_test: i8 = stack_pop.try_into().unwrap();
         assert_eq!(prim_test, init);
     }
 
     #[test]
     fn test_i16_lifecycle() {
-        let init: i16 = 1234;
+        let init: i16 = -1000;
         let value = Value::from(init);
         let code: &[u8] = &value.to_code()[2..];
         let decode = Value::from_code(TypeFlag::I16, code);
-        let prim_test: i16 = decode.try_into().unwrap();
+        let stack_push = decode.to_stack();
+        let stack_pop = Value::from_stack(TypeFlag::I16, stack_push);
+        let prim_test: i16 = stack_pop.try_into().unwrap();
         assert_eq!(prim_test, init);
     }
-    
+
     #[test]
     fn test_i32_lifecycle() {
-        let init: i32 = -5678;
+        let init: i32 = 123456789;
         let value = Value::from(init);
         let code: &[u8] = &value.to_code()[2..];
         let decode = Value::from_code(TypeFlag::I32, code);
-        let prim_test: i32 = decode.try_into().unwrap();
+        let stack_push = decode.to_stack();
+        let stack_pop = Value::from_stack(TypeFlag::I32, stack_push);
+        let prim_test: i32 = stack_pop.try_into().unwrap();
         assert_eq!(prim_test, init);
     }
-    
+
     #[test]
     fn test_i64_lifecycle() {
-        let init: i64 = 9876543210;
+        let init: i64 = -9876543210;
         let value = Value::from(init);
         let code: &[u8] = &value.to_code()[2..];
         let decode = Value::from_code(TypeFlag::I64, code);
-        let prim_test: i64 = decode.try_into().unwrap();
+        let stack_push = decode.to_stack();
+        let stack_pop = Value::from_stack(TypeFlag::I64, stack_push);
+        let prim_test: i64 = stack_pop.try_into().unwrap();
         assert_eq!(prim_test, init);
     }
-    
+
     #[test]
     fn test_f32_lifecycle() {
         let init: f32 = std::f32::consts::PI;
         let value = Value::from(init);
         let code: &[u8] = &value.to_code()[2..];
         let decode = Value::from_code(TypeFlag::F32, code);
-        let prim_test: f32 = decode.try_into().unwrap();
+        let stack_push = decode.to_stack();
+        let stack_pop = Value::from_stack(TypeFlag::F32, stack_push);
+        let prim_test: f32 = stack_pop.try_into().unwrap();
         assert_eq!(prim_test, init);
     }
-    
+
     #[test]
     fn test_f64_lifecycle() {
         let init: f64 = std::f64::consts::PI;
         let value = Value::from(init);
         let code: &[u8] = &value.to_code()[2..];
         let decode = Value::from_code(TypeFlag::F64, code);
-        let prim_test: f64 = decode.try_into().unwrap();
+        let stack_push = decode.to_stack();
+        let stack_pop = Value::from_stack(TypeFlag::F64, stack_push);
+        let prim_test: f64 = stack_pop.try_into().unwrap();
         assert_eq!(prim_test, init);
     }
-    
+
     #[test]
-    fn test_bool_lifecycle() {
+    fn test_true_lifecycle() {
         let init: bool = true;
         let value = Value::from(init);
         let code: &[u8] = &value.to_code()[2..];
         let decode = Value::from_code(TypeFlag::Bool, code);
-        let prim_test: bool = decode.try_into().unwrap();
+        let stack_push = decode.to_stack();
+        let stack_pop = Value::from_stack(TypeFlag::Bool, stack_push);
+        let prim_test: bool = stack_pop.try_into().unwrap();
         assert_eq!(prim_test, init);
     }
-    
+
+    #[test]
+    fn test_false_lifecycle() {
+        let init: bool = false;
+        let value = Value::from(init);
+        let code: &[u8] = &value.to_code()[2..];
+        let decode = Value::from_code(TypeFlag::Bool, code);
+        let stack_push = decode.to_stack();
+        let stack_pop = Value::from_stack(TypeFlag::Bool, stack_push);
+        let prim_test: bool = stack_pop.try_into().unwrap();
+        assert_eq!(prim_test, init);
+    }
+
     #[test]
     fn test_char_lifecycle() {
         let init: char = 'A';
         let value = Value::from(init);
         let code: &[u8] = &value.to_code()[2..];
         let decode = Value::from_code(TypeFlag::Char, code);
-        let prim_test: char = decode.try_into().unwrap();
+        let stack_push = decode.to_stack();
+        let stack_pop = Value::from_stack(TypeFlag::Char, stack_push);
+        let prim_test: char = stack_pop.try_into().unwrap();
         assert_eq!(prim_test, init);
     }
-    
+
     #[test]
     fn test_u8_lifecycle() {
         let init: u8 = 255;
         let value = Value::from(init);
         let code: &[u8] = &value.to_code()[2..];
         let decode = Value::from_code(TypeFlag::U8, code);
-        let prim_test: u8 = decode.try_into().unwrap();
+        let stack_push = decode.to_stack();
+        let stack_pop = Value::from_stack(TypeFlag::U8, stack_push);
+        let prim_test: u8 = stack_pop.try_into().unwrap();
         assert_eq!(prim_test, init);
     }
-    
+
     #[test]
     fn test_u16_lifecycle() {
         let init: u16 = 65535;
         let value = Value::from(init);
         let code: &[u8] = &value.to_code()[2..];
         let decode = Value::from_code(TypeFlag::U16, code);
-        let prim_test: u16 = decode.try_into().unwrap();
+        let stack_push = decode.to_stack();
+        let stack_pop = Value::from_stack(TypeFlag::U16, stack_push);
+        let prim_test: u16 = stack_pop.try_into().unwrap();
         assert_eq!(prim_test, init);
     }
-    
+
     #[test]
     fn test_u32_lifecycle() {
         let init: u32 = 4294967295;
         let value = Value::from(init);
         let code: &[u8] = &value.to_code()[2..];
         let decode = Value::from_code(TypeFlag::U32, code);
-        let prim_test: u32 = decode.try_into().unwrap();
+        let stack_push = decode.to_stack();
+        let stack_pop = Value::from_stack(TypeFlag::U32, stack_push);
+        let prim_test: u32 = stack_pop.try_into().unwrap();
         assert_eq!(prim_test, init);
     }
-    
+
     #[test]
     fn test_u64_lifecycle() {
         let init: u64 = 18446744073709551615;
         let value = Value::from(init);
         let code: &[u8] = &value.to_code()[2..];
         let decode = Value::from_code(TypeFlag::U64, code);
-        let prim_test: u64 = decode.try_into().unwrap();
+        let stack_push = decode.to_stack();
+        let stack_pop = Value::from_stack(TypeFlag::U64, stack_push);
+        let prim_test: u64 = stack_pop.try_into().unwrap();
         assert_eq!(prim_test, init);
     }
 }
