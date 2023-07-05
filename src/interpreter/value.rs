@@ -100,8 +100,8 @@ impl Value {
         self.data
     }
 
-    pub fn from_stack(ty: TypeFlag, stack: u64) -> Self {
-        Self { ty, data: stack }
+    pub fn from_stack(ty: TypeFlag, raw: u64) -> Self {
+        Self { ty, data: raw }
     }
 }
 
@@ -223,311 +223,77 @@ impl TryInto<f64> for Value {
     }
 }
 
-impl std::ops::Add for Value {
-    type Output = Self;
+macro_rules! impl_arith_ops {
+    ($trait:path, $fn_name:ident, $op:tt) => {
+        impl $trait for Value {
+            type Output = Self;
 
-    fn add(self, rhs: Self) -> Self::Output {
-        use TypeFlag::*;
-        match (self.ty, rhs.ty) {
-            (I8, I8) => {
-                let lhs: i8 = self.try_into().unwrap();
-                let rhs: i8 = rhs.try_into().unwrap();
-                (lhs + rhs).into()
+                fn $fn_name(self, rhs: Self) -> Self::Output {
+                    use TypeFlag::*;
+                    match (self.ty, rhs.ty) {
+                        (I8, I8) => {
+                            let lhs: i8 = self.try_into().unwrap();
+                            let rhs: i8 = rhs.try_into().unwrap();
+                            (lhs $op rhs).into()
+                        }
+                        (I16, I16) => {
+                            let lhs: i16 = self.try_into().unwrap();
+                            let rhs: i16 = rhs.try_into().unwrap();
+                            (lhs $op rhs).into()
+                        }
+                        (I32, I32) => {
+                            let lhs: i32 = self.try_into().unwrap();
+                            let rhs: i32 = rhs.try_into().unwrap();
+                            (lhs $op rhs).into()
+                        }
+                        (I64, I64) => {
+                            let lhs: i64 = self.try_into().unwrap();
+                            let rhs: i64 = rhs.try_into().unwrap();
+                            (lhs $op rhs).into()
+                        }
+                        (F32, F32) => {
+                            let lhs: f32 = self.try_into().unwrap();
+                            let rhs: f32 = rhs.try_into().unwrap();
+                            (lhs $op rhs).into()
+                        }
+                        (F64, F64) => {
+                            let lhs: f64 = self.try_into().unwrap();
+                            let rhs: f64 = rhs.try_into().unwrap();
+                            (lhs $op rhs).into()
+                        }
+                        (U8, U8) => {
+                            let lhs: u8 = self.try_into().unwrap();
+                            let rhs: u8 = rhs.try_into().unwrap();
+                            (lhs $op rhs).into()
+                        }
+                        (U16, U16) => {
+                            let lhs: u16 = self.try_into().unwrap();
+                            let rhs: u16 = rhs.try_into().unwrap();
+                            (lhs $op rhs).into()
+                        }
+                        (U32, U32) => {
+                            let lhs: u32 = self.try_into().unwrap();
+                            let rhs: u32 = rhs.try_into().unwrap();
+                            (lhs $op rhs).into()
+                        }
+                        (U64, U64) => {
+                            let lhs: u64 = self.try_into().unwrap();
+                            let rhs: u64 = rhs.try_into().unwrap();
+                            (lhs $op rhs).into()
+                        }
+                        _ => panic!("invalid types"),
+                    }
+                }
             }
-            (I16, I16) => {
-                let lhs: i16 = self.try_into().unwrap();
-                let rhs: i16 = rhs.try_into().unwrap();
-                (lhs + rhs).into()
-            }
-            (I32, I32) => {
-                let lhs: i32 = self.try_into().unwrap();
-                let rhs: i32 = rhs.try_into().unwrap();
-                (lhs + rhs).into()
-            }
-            (I64, I64) => {
-                let lhs: i64 = self.try_into().unwrap();
-                let rhs: i64 = rhs.try_into().unwrap();
-                (lhs + rhs).into()
-            }
-            (U8, U8) => {
-                let lhs: u8 = self.try_into().unwrap();
-                let rhs: u8 = rhs.try_into().unwrap();
-                (lhs + rhs).into()
-            }
-            (U16, U16) => {
-                let lhs: u16 = self.try_into().unwrap();
-                let rhs: u16 = rhs.try_into().unwrap();
-                (lhs + rhs).into()
-            }
-            (U32, U32) => {
-                let lhs: u32 = self.try_into().unwrap();
-                let rhs: u32 = rhs.try_into().unwrap();
-                (lhs + rhs).into()
-            }
-            (U64, U64) => {
-                let lhs: u64 = self.try_into().unwrap();
-                let rhs: u64 = rhs.try_into().unwrap();
-                (lhs + rhs).into()
-            }
-            (F32, F32) => {
-                let lhs: f32 = self.try_into().unwrap();
-                let rhs: f32 = rhs.try_into().unwrap();
-                (lhs + rhs).into()
-            }
-            (F64, F64) => {
-                let lhs: f64 = self.try_into().unwrap();
-                let rhs: f64 = rhs.try_into().unwrap();
-                (lhs + rhs).into()
-            }
-            _ => panic!("invalid types"),
-        }
-    }
+    };
 }
 
-impl std::ops::Sub for Value {
-    type Output = Self;
+impl_arith_ops!(std::ops::Add, add, +);
+impl_arith_ops!(std::ops::Sub, sub, -);
+impl_arith_ops!(std::ops::Mul, mul, *);
+impl_arith_ops!(std::ops::Div, div, /);
+impl_arith_ops!(std::ops::Rem, rem, %);
 
-    fn sub(self, rhs: Self) -> Self::Output {
-        use TypeFlag::*;
-        match (self.ty, rhs.ty) {
-            (I8, I8) => {
-                let lhs: i8 = self.try_into().unwrap();
-                let rhs: i8 = rhs.try_into().unwrap();
-                (lhs - rhs).into()
-            }
-            (I16, I16) => {
-                let lhs: i16 = self.try_into().unwrap();
-                let rhs: i16 = rhs.try_into().unwrap();
-                (lhs - rhs).into()
-            }
-            (I32, I32) => {
-                let lhs: i32 = self.try_into().unwrap();
-                let rhs: i32 = rhs.try_into().unwrap();
-                (lhs - rhs).into()
-            }
-            (I64, I64) => {
-                let lhs: i64 = self.try_into().unwrap();
-                let rhs: i64 = rhs.try_into().unwrap();
-                (lhs - rhs).into()
-            }
-            (U8, U8) => {
-                let lhs: u8 = self.try_into().unwrap();
-                let rhs: u8 = rhs.try_into().unwrap();
-                (lhs - rhs).into()
-            }
-            (U16, U16) => {
-                let lhs: u16 = self.try_into().unwrap();
-                let rhs: u16 = rhs.try_into().unwrap();
-                (lhs - rhs).into()
-            }
-            (U32, U32) => {
-                let lhs: u32 = self.try_into().unwrap();
-                let rhs: u32 = rhs.try_into().unwrap();
-                (lhs - rhs).into()
-            }
-            (U64, U64) => {
-                let lhs: u64 = self.try_into().unwrap();
-                let rhs: u64 = rhs.try_into().unwrap();
-                (lhs - rhs).into()
-            }
-            (F32, F32) => {
-                let lhs: f32 = self.try_into().unwrap();
-                let rhs: f32 = rhs.try_into().unwrap();
-                (lhs - rhs).into()
-            }
-            (F64, F64) => {
-                let lhs: f64 = self.try_into().unwrap();
-                let rhs: f64 = rhs.try_into().unwrap();
-                (lhs - rhs).into()
-            }
-            _ => panic!("invalid types"),
-        }
-    }
-}
-
-impl std::ops::Mul for Value {
-    type Output = Self;
-
-    fn mul(self, rhs: Self) -> Self::Output {
-        use TypeFlag::*;
-        match (self.ty, rhs.ty) {
-            (I8, I8) => {
-                let lhs: i8 = self.try_into().unwrap();
-                let rhs: i8 = rhs.try_into().unwrap();
-                (lhs * rhs).into()
-            }
-            (I16, I16) => {
-                let lhs: i16 = self.try_into().unwrap();
-                let rhs: i16 = rhs.try_into().unwrap();
-                (lhs * rhs).into()
-            }
-            (I32, I32) => {
-                let lhs: i32 = self.try_into().unwrap();
-                let rhs: i32 = rhs.try_into().unwrap();
-                (lhs * rhs).into()
-            }
-            (I64, I64) => {
-                let lhs: i64 = self.try_into().unwrap();
-                let rhs: i64 = rhs.try_into().unwrap();
-                (lhs * rhs).into()
-            }
-            (U8, U8) => {
-                let lhs: u8 = self.try_into().unwrap();
-                let rhs: u8 = rhs.try_into().unwrap();
-                (lhs * rhs).into()
-            }
-            (U16, U16) => {
-                let lhs: u16 = self.try_into().unwrap();
-                let rhs: u16 = rhs.try_into().unwrap();
-                (lhs * rhs).into()
-            }
-            (U32, U32) => {
-                let lhs: u32 = self.try_into().unwrap();
-                let rhs: u32 = rhs.try_into().unwrap();
-                (lhs * rhs).into()
-            }
-            (U64, U64) => {
-                let lhs: u64 = self.try_into().unwrap();
-                let rhs: u64 = rhs.try_into().unwrap();
-                (lhs * rhs).into()
-            }
-            (F32, F32) => {
-                let lhs: f32 = self.try_into().unwrap();
-                let rhs: f32 = rhs.try_into().unwrap();
-                (lhs * rhs).into()
-            }
-            (F64, F64) => {
-                let lhs: f64 = self.try_into().unwrap();
-                let rhs: f64 = rhs.try_into().unwrap();
-                (lhs * rhs).into()
-            }
-            _ => panic!("invalid types"),
-        }
-    }
-}
-
-impl std::ops::Div for Value {
-    type Output = Self;
-
-    fn div(self, rhs: Self) -> Self::Output {
-        use TypeFlag::*;
-
-        match (self.ty, rhs.ty) {
-            (I8, I8) => {
-                let lhs: i8 = self.try_into().unwrap();
-                let rhs: i8 = rhs.try_into().unwrap();
-                (lhs / rhs).into()
-            }
-            (I16, I16) => {
-                let lhs: i16 = self.try_into().unwrap();
-                let rhs: i16 = rhs.try_into().unwrap();
-                (lhs / rhs).into()
-            }
-            (I32, I32) => {
-                let lhs: i32 = self.try_into().unwrap();
-                let rhs: i32 = rhs.try_into().unwrap();
-                (lhs / rhs).into()
-            }
-            (I64, I64) => {
-                let lhs: i64 = self.try_into().unwrap();
-                let rhs: i64 = rhs.try_into().unwrap();
-                (lhs / rhs).into()
-            }
-            (U8, U8) => {
-                let lhs: u8 = self.try_into().unwrap();
-                let rhs: u8 = rhs.try_into().unwrap();
-                (lhs / rhs).into()
-            }
-            (U16, U16) => {
-                let lhs: u16 = self.try_into().unwrap();
-                let rhs: u16 = rhs.try_into().unwrap();
-                (lhs / rhs).into()
-            }
-            (U32, U32) => {
-                let lhs: u32 = self.try_into().unwrap();
-                let rhs: u32 = rhs.try_into().unwrap();
-                (lhs / rhs).into()
-            }
-            (U64, U64) => {
-                let lhs: u64 = self.try_into().unwrap();
-                let rhs: u64 = rhs.try_into().unwrap();
-                (lhs / rhs).into()
-            }
-            (F32, F32) => {
-                let lhs: f32 = self.try_into().unwrap();
-                let rhs: f32 = rhs.try_into().unwrap();
-                (lhs / rhs).into()
-            }
-            (F64, F64) => {
-                let lhs: f64 = self.try_into().unwrap();
-                let rhs: f64 = rhs.try_into().unwrap();
-                (lhs / rhs).into()
-            }
-            _ => panic!("invalid types"),
-        }
-    }
-}
-
-impl std::ops::Rem for Value {
-    type Output = Self;
-
-    fn rem(self, rhs: Self) -> Self::Output {
-        use TypeFlag::*;
-        match (self.ty, rhs.ty) {
-            (I8, I8) => {
-                let lhs: i8 = self.try_into().unwrap();
-                let rhs: i8 = rhs.try_into().unwrap();
-                (lhs % rhs).into()
-            }
-            (I16, I16) => {
-                let lhs: i16 = self.try_into().unwrap();
-                let rhs: i16 = rhs.try_into().unwrap();
-                (lhs % rhs).into()
-            }
-            (I32, I32) => {
-                let lhs: i32 = self.try_into().unwrap();
-                let rhs: i32 = rhs.try_into().unwrap();
-                (lhs % rhs).into()
-            }
-            (I64, I64) => {
-                let lhs: i64 = self.try_into().unwrap();
-                let rhs: i64 = rhs.try_into().unwrap();
-                (lhs % rhs).into()
-            }
-            (U8, U8) => {
-                let lhs: u8 = self.try_into().unwrap();
-                let rhs: u8 = rhs.try_into().unwrap();
-                (lhs % rhs).into()
-            }
-            (U16, U16) => {
-                let lhs: u16 = self.try_into().unwrap();
-                let rhs: u16 = rhs.try_into().unwrap();
-                (lhs % rhs).into()
-            }
-            (U32, U32) => {
-                let lhs: u32 = self.try_into().unwrap();
-                let rhs: u32 = rhs.try_into().unwrap();
-                (lhs % rhs).into()
-            }
-            (U64, U64) => {
-                let lhs: u64 = self.try_into().unwrap();
-                let rhs: u64 = rhs.try_into().unwrap();
-                (lhs % rhs).into()
-            }
-            (F32, F32) => {
-                let lhs: f32 = self.try_into().unwrap();
-                let rhs: f32 = rhs.try_into().unwrap();
-                (lhs % rhs).into()
-            }
-            (F64, F64) => {
-                let lhs: f64 = self.try_into().unwrap();
-                let rhs: f64 = rhs.try_into().unwrap();
-                (lhs % rhs).into()
-            }
-            _ => panic!("invalid types"),
-        }
-    }
-}
 
 #[cfg(test)]
 mod tests {

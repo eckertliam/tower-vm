@@ -23,4 +23,72 @@ impl Machine {
             ty_flag: 11.into(),// default to u64
         }
     }
+
+    fn stack_push(&mut self, raw: u64) {
+        // push a raw value to the stack and increment the stack pointer
+        self.stack[self.sp] = raw;
+        self.sp += 1;
+    }
+
+    fn stack_pop(&mut self) -> u64 {
+        // get the raw value from the stack and decrement the stack pointer
+        self.sp -= 1;
+        self.stack[self.sp]
+    }
+
+    fn value_pop(&mut self) -> Value {
+        // pop a value from the stack and convert it to the current type flag
+        Value::from_stack(self.ty_flag, self.stack_pop())
+    }
+
+    fn value_push(&mut self, value: Value) {
+        // push a value to the stack 
+        self.stack_push(value.to_stack());
+    }
+
+    fn halt(self) {
+        std::process::exit(0);
+    }
+
+    fn set_ty_flag(&mut self) {
+        // ip currently points to the SET_TYPE instruction
+        // increment ip to point to the next byte which is the type flag
+        self.ip += 1;
+        self.ty_flag = self.code[self.ip].into();
+        self.ip += 1;
+    }
+
+    fn get_ty_flag(&mut self) {
+        self.stack_push(self.ty_flag.into());            
+    }
+
+    fn add(&mut self) {
+        let lhs = self.value_pop();
+        let rhs = self.value_pop();
+        self.value_push(lhs + rhs);
+    }
+
+    fn sub(&mut self) {
+        let lhs = self.value_pop();
+        let rhs = self.value_pop();
+        self.value_push(lhs - rhs);
+    }
+
+    fn mul(&mut self) {
+        let lhs = self.value_pop();
+        let rhs = self.value_pop();
+        self.value_push(lhs * rhs);
+    }
+
+    fn div(&mut self) {
+        let lhs = self.value_pop();
+        let rhs = self.value_pop();
+        self.value_push(lhs / rhs);
+    }
+
+    fn rem(&mut self) {
+        let lhs = self.value_pop();
+        let rhs = self.value_pop();
+        self.value_push(lhs % rhs);
+    }
 }
