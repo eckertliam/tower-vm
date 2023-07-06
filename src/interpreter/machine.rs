@@ -91,4 +91,45 @@ impl Machine {
         let rhs = self.value_pop();
         self.value_push(lhs % rhs);
     }
+
+    fn neg(&mut self) {
+        self.stack[self.sp - 1] = (-(Value::from_stack(self.ty_flag, self.stack[self.sp - 1]))).to_stack();
+    }
+
+    fn incr(&mut self) {
+        let value = Value::from_stack(self.ty_flag, self.stack[self.sp - 1]);
+        self.stack[self.sp - 1] = (value + Value::from_stack(self.ty_flag, 1)).to_stack();
+    }
+
+    fn decr(&mut self) {
+        let value = Value::from_stack(self.ty_flag, self.stack[self.sp - 1]);
+        self.stack[self.sp - 1] = (value - Value::from_stack(self.ty_flag, 1)).to_stack();
+    }
+
+    fn eq(&mut self) {
+        let lhs = self.value_pop();
+        let rhs = self.value_pop();
+        let curr_ty = self.ty_flag;
+        self.ty_flag = TypeFlag::Bool;
+        self.value_push((lhs == rhs).into());
+        self.ty_flag = curr_ty;
+    }
+
+    fn neq(&mut self) {
+        let lhs = self.value_pop();
+        let rhs = self.value_pop();
+        let curr_ty = self.ty_flag;
+        self.ty_flag = TypeFlag::Bool;
+        self.value_push((lhs != rhs).into());
+        self.ty_flag = curr_ty;
+    }
+
+    fn lt(&mut self) {
+        let lhs = self.value_pop();
+        let rhs = self.value_pop();
+        let curr_ty = self.ty_flag;
+        self.ty_flag = TypeFlag::Bool;
+        self.value_push((lhs < rhs).into());
+        self.ty_flag = curr_ty;
+    }
 }

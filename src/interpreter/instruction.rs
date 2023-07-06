@@ -12,9 +12,12 @@ pub enum Instruction {
     Mul,
     Div,
     Rem,
-    Pow,
+
+    // Neg does not pop a value, it just negates the top of the stack
+    Neg,
 
     // incr and decr don't pop a value, they just increment or decrement the top of the stack
+    // will probably throw err if called on a non-integer type
     // good for control flow, address arithmetic, etc.
     Incr,
     Decr,
