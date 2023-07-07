@@ -1,4 +1,4 @@
-use super::value::{TypeFlag, Value};
+use super::{value::{TypeFlag, Value}, instruction::Instruction};
 
 const STACK_SIZE: usize = 1024;
 
@@ -69,7 +69,7 @@ impl Machine {
         self.stack_push(value.to_stack());
     }
 
-    fn halt(self) {
+    fn halt(&self) {
         std::process::exit(0);
     }
 
@@ -209,4 +209,83 @@ impl Machine {
         self.heap.resize(addr + size, 0);
     }
 
+    fn heap_size(&mut self) {
+        self.stack_push(self.heap.len() as u64);
+    }
+
+    fn stack_size(&mut self) {
+        self.stack_push(self.sp as u64);
+    }
+
+    fn load_code(&mut self) {
+        let addr = self.stack_pop() as usize;
+        let size = self.stack_pop() as usize;
+        let new_code_start = self.code.len();
+        self.code.extend_from_slice(&self.heap[addr..addr + size]);
+        self.stack_push(new_code_start as u64);
+    }
+
+    fn save_code(&mut self) {
+        let addr = self.stack_pop() as usize;
+        let size = self.stack_pop() as usize;
+        let code_seg = &self.code[addr..addr + size];
+        let heap_len = self.heap.len();
+        self.heap.extend_from_slice(code_seg);
+        self.stack_push(heap_len as u64);
+    }
+
+    fn println(&mut self) {
+        let value = self.value_pop();
+        println!("{}", value);
+    }
+
+    fn dispatch(&mut self) {
+        use Instruction::*;
+
+        let opcode: Instruction = self.code[self.ip].into();
+
+        match opcode {
+            Halt => self.halt(),
+            SetType => self.set_ty_flag(),
+            GetType => self.get_ty_flag(),
+            Add => self.add(),
+            Sub => self.sub(),
+            Mul => self.mul(),
+            Div => self.div(),
+            Rem => self.rem(),
+            Neg => self.neg(),
+            Incr => self.incr(),
+            Decr => self.decr(),
+            Eq => self.eq(),
+            Neq => self.neq(),
+            Lt => self.lt(),
+            Gt => self.gt(),
+            Lte => self.lte(),
+            Gte => self.gte(),
+            And => self.and(),
+            Or => self.or(),
+            Xor => self.xor(),
+            Shl => self.shl(),
+            Shr => self.shr(),
+            Not => self.not(),
+            Jmp => self.jmp(),
+            JmpIf => self.jmp_if(),
+            JmpIfNot => self.jmp_if_not(),
+            Call => self.call(),
+            Ret => self.ret(),
+            Push => self.push(),
+            Dup => self.dup(),
+            Drop => self.drop(),
+            Swap => self.swap(),
+            Load => self.load(),
+            Store => self.store(),
+            Alloc => self.alloc(),
+            Free => self.free(),
+            HeapSize => self.heap_size(),
+            StackSize => self.stack_size(),
+            LoadCode => self.load_code(),
+            SaveCode => self.save_code(),
+            Print => self.println(),
+        }
+    }
 }

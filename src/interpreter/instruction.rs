@@ -60,4 +60,66 @@ pub enum Instruction {
     Store, // pop value and address from stack, store value at address as bytes
     Alloc, // pop size from stack, expand heap by sizeof(current type flag) * size, push first address of new heap space
     Free,  // pop address from stack, decrement heap size by sizeof(current type flag) * size
+    HeapSize, // push heap size to stack
+    StackSize, // push stack size to stack
+
+    // meta instructions
+    // these instructions are used for loading code into the interpreter
+    LoadCode, // pop two addresses from stack, take the bytes between the addresses on the heap and extend the code segment with them, and push the address of the new code segment to the stack
+    SaveCode, // pop two addresses from stack, take the bytes between the addresses on the code segment and extend the heap with them, and push the address of the new heap segment to the stack
+
+    // io instructions
+    // will be extended to support more, print is just for testing
+    Print, // pop value from stack and print it to stdout
+}
+
+impl From<u8> for Instruction {
+    fn from(value: u8) -> Self {
+        use Instruction::*;
+
+        match value {
+            0 => Halt,
+            1 => SetType,
+            2 => GetType,
+            3 => Add,
+            4 => Sub,
+            5 => Mul,
+            6 => Div,
+            7 => Rem,
+            8 => Neg,
+            9 => Incr,
+            10 => Decr,
+            11 => Eq,
+            12 => Neq,
+            13 => Lt,
+            14 => Gt,
+            15 => Lte,
+            16 => Gte,
+            17 => And,
+            18 => Or,
+            19 => Xor,
+            20 => Shl,
+            21 => Shr,
+            22 => Not,
+            23 => Jmp,
+            24 => JmpIf,
+            25 => JmpIfNot,
+            26 => Call,
+            27 => Ret,
+            28 => Push,
+            29 => Dup,
+            30 => Drop,
+            31 => Swap,
+            32 => Load,
+            33 => Store,
+            34 => Alloc,
+            35 => Free,
+            36 => HeapSize,
+            37 => StackSize,
+            38 => LoadCode,
+            39 => SaveCode,
+            40 => Print,
+            _ => panic!("invalid instruction"),
+        }
+    }
 }

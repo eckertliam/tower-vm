@@ -118,6 +118,8 @@ macro_rules! impl_from_value {
     };
 }
 
+
+
 impl_from_value!(i8, I8);
 impl_from_value!(i16, I16);
 impl_from_value!(i32, I32);
@@ -130,6 +132,8 @@ impl_from_value!(u8, U8);
 impl_from_value!(u16, U16);
 impl_from_value!(u32, U32);
 impl_from_value!(u64, U64);
+
+
 
 impl From<f32> for Value {
     fn from(value: f32) -> Self {
@@ -162,6 +166,18 @@ macro_rules! impl_try_into_value {
                 }
             }
         }
+
+        impl TryInto<$to_type> for &Value {
+            type Error = &'static str;
+
+            fn try_into(self) -> Result<$to_type, Self::Error> {
+                if self.ty == TypeFlag::$type_flag {
+                    Ok(self.data as $to_type)
+                } else {
+                    Err("invalid type")
+                }
+            }
+        }
     };
 }
 
@@ -182,7 +198,31 @@ impl TryInto<char> for Value {
     }
 }
 
+impl TryInto<char> for &Value {
+    type Error = &'static str;
+
+    fn try_into(self) -> Result<char, Self::Error> {
+        if self.ty == TypeFlag::Char {
+            Ok(char::from_u32(self.data as u32).unwrap())
+        } else {
+            Err("invalid type")
+        }
+    }
+}
+
 impl TryInto<bool> for Value {
+    type Error = &'static str;
+
+    fn try_into(self) -> Result<bool, Self::Error> {
+        if self.ty == TypeFlag::Bool {
+            Ok(self.data != 0)
+        } else {
+            Err("invalid type")
+        }
+    }
+}
+
+impl TryInto<bool> for &Value {
     type Error = &'static str;
 
     fn try_into(self) -> Result<bool, Self::Error> {
@@ -211,7 +251,31 @@ impl TryInto<f32> for Value {
     }
 }
 
+impl TryInto<f32> for &Value {
+    type Error = &'static str;
+
+    fn try_into(self) -> Result<f32, Self::Error> {
+        if self.ty == TypeFlag::F32 {
+            Ok(f32::from_bits(self.data as u32))
+        } else {
+            Err("invalid type")
+        }
+    }
+}
+
 impl TryInto<f64> for Value {
+    type Error = &'static str;
+
+    fn try_into(self) -> Result<f64, Self::Error> {
+        if self.ty == TypeFlag::F64 {
+            Ok(f64::from_bits(self.data))
+        } else {
+            Err("invalid type")
+        }
+    }
+}
+
+impl TryInto<f64> for &Value {
     type Error = &'static str;
 
     fn try_into(self) -> Result<f64, Self::Error> {
@@ -462,6 +526,64 @@ impl std::cmp::PartialOrd for Value {
             return self.data.partial_cmp(&other.data);
         }
         return None;
+    }
+}
+
+
+impl std::fmt::Display for Value {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        use TypeFlag::*;
+
+        match self.ty {
+            I8 => {
+                let val: i8 = self.try_into().unwrap();
+                write!(f, "{}", val)
+            },
+            I16 => {
+                let val: i16 = self.try_into().unwrap();
+                write!(f, "{}", val)
+            },
+            I32 => {
+                let val: i32 = self.try_into().unwrap();
+                write!(f, "{}", val)
+            },
+            I64 => {
+                let val: i64 = self.try_into().unwrap();
+                write!(f, "{}", val)
+            },
+            U8 => {
+                let val: u8 = self.try_into().unwrap();
+                write!(f, "{}", val)
+            },
+            U16 => {
+                let val: u16 = self.try_into().unwrap();
+                write!(f, "{}", val)
+            },
+            U32 => {
+                let val: u32 = self.try_into().unwrap();
+                write!(f, "{}", val)
+            },
+            U64 => {
+                let val: u64 = self.try_into().unwrap();
+                write!(f, "{}", val)
+            },
+            F32 => {
+                let val: f32 = self.try_into().unwrap();
+                write!(f, "{}", val)
+            },
+            F64 => {
+                let val: f64 = self.try_into().unwrap();
+                write!(f, "{}", val)
+            },
+            Bool => {
+                let val: bool = self.try_into().unwrap();
+                write!(f, "{}", val)
+            },
+            Char => {
+                let val: char = self.try_into().unwrap();
+                write!(f, "{}", val)
+            },
+        }
     }
 }
 
@@ -798,11 +920,9 @@ mod tests {
 
     #[test]
     fn test_u64_shift() {
-        let lhs = Value::from(10000u64);
-        let rhs = Value::from(5u64);
-        let expected = Value::from(10000u64 << 5u64);
-        let actual = lhs << rhs;
-        assert_eq!(expected, actual);
+        shift_tests!(u64, 100u64, 3u64);
+        shift_tests!(u64, 20u64, 4u64);
+        shift_tests!(u64, 22u64, 5u64);
     }
 
     // std::ops::Not tests
