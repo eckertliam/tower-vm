@@ -577,7 +577,7 @@ mod tests {
     // 2. create a value called expected that is the known result of lhs + rhs
     // 3. create a value called actual that is lhs + rhs
     // 4. assert that expected == actual
-    macro_rules! arith_test {
+    macro_rules! bin_test {
         ($type:ty, $lhs:expr, $rhs:expr, $op:tt) => {
             let lhs = Value::from($lhs);
             let rhs = Value::from($rhs);
@@ -589,15 +589,15 @@ mod tests {
 
     macro_rules! all_arith_tests {
         ($type:ty, $lhs:expr, $rhs:expr) => {
-            arith_test!($type, $lhs, $rhs, +);
+            bin_test!($type, $lhs, $rhs, +);
 
-            arith_test!($type, $lhs, $rhs, -);
+            bin_test!($type, $lhs, $rhs, -);
 
-            arith_test!($type, $lhs, $rhs, *);
+            bin_test!($type, $lhs, $rhs, *);
 
-            arith_test!($type, $lhs, $rhs, /);
+            bin_test!($type, $lhs, $rhs, /);
 
-            arith_test!($type, $lhs, $rhs, %);
+            bin_test!($type, $lhs, $rhs, %);
         };
     }
 
@@ -617,714 +617,187 @@ mod tests {
 
     #[test]
     fn test_i32_arith() {
-        arith_test!(i32, 100, 50, +);
-        arith_test!(i32, 89, 11, +);
-
-        arith_test!(i32, 100, 50, -);
-        arith_test!(i32, 89, 11, -);
-
-        arith_test!(i32, 100, 5, *);
-        arith_test!(i32, 89, 11, *);
-
-        arith_test!(i32, 100, 5, /);
-        arith_test!(i32, 89, 11, /);
-
-        arith_test!(i32, 100, 5, %);
-        arith_test!(i32, 89, 11, %);
+        all_arith_tests!(i32, 88, 44);
+        all_arith_tests!(i32, 56, 8);
+        all_arith_tests!(i32, 100, 5);
     }
 
     #[test]
     fn test_i64_arith() {
-        arith_test!(i64, 100, 50, +);
-        arith_test!(i64, 89, 11, +);
-
-        arith_test!(i64, 100, 50, -);
-        arith_test!(i64, 89, 11, -);
-
-        arith_test!(i64, 100, 5, *);
-        arith_test!(i64, 89, 11, *);
-
-        arith_test!(i64, 100, 5, /);
-        arith_test!(i64, 89, 11, /);
-
-        arith_test!(i64, 100, 5, %);
-        arith_test!(i64, 89, 11, %);
+        all_arith_tests!(i64, 100, 5);
+        all_arith_tests!(i64, 648, 111);
+        all_arith_tests!(i64, 86, 4);
     }
 
     #[test]
-    fn test_f32_add() {
-        let lhs = Value::from(std::f32::consts::PI);
-        let rhs = Value::from(0.000002f32);
-        let expected = Value::from(std::f32::consts::PI + 0.000002);
-        let actual = lhs + rhs;
-        assert_eq!(expected, actual);
+    fn test_f32_arith() {
+        all_arith_tests!(f32, std::f32::consts::PI, 1.3456f32);
+        all_arith_tests!(f32, std::f32::consts::E, 13.7689f32);
+        all_arith_tests!(f32, 1.067f32, 1.12310f32);
+
     }
 
     #[test]
-    fn test_f64_add() {
-        let lhs = Value::from(std::f64::consts::PI);
-        let rhs = Value::from(1.3456f64);
-        let expected = Value::from(std::f64::consts::PI + 1.3456);
-        let actual = lhs + rhs;
-        assert_eq!(expected, actual);
+    fn test_f64_arith() {
+        all_arith_tests!(f64, std::f64::consts::PI, 1.3456f64);
+        all_arith_tests!(f64, std::f64::consts::E, 13.7689f64);
+        all_arith_tests!(f64, 1.067f64, 1.12310f64);
     }
 
-    // std::ops::Sub tests
 
     #[test]
-    fn test_i8_sub() {
-        let lhs = Value::from(1i8);
-        let rhs = Value::from(2i8);
-        let expected = Value::from(-1i8);
-        let actual = lhs - rhs;
-        assert_eq!(expected, actual);
+    fn test_u8_arith() {
+        all_arith_tests!(u8, 100, 5);
+        all_arith_tests!(u8, 255, 1);
+        all_arith_tests!(u8, 86, 4);
     }
 
     #[test]
-    fn test_i16_sub() {
-        let lhs = Value::from(1500i16);
-        let rhs = Value::from(2001i16);
-        let expected = Value::from(1500i16 - 2001i16);
-        let actual = lhs - rhs;
-        assert_eq!(expected, actual);
+    fn test_u16_arith() {
+        all_arith_tests!(u16, 100, 5);
+        all_arith_tests!(u16, 65535, 1);
+        all_arith_tests!(u16, 86, 4);
     }
 
     #[test]
-    fn test_i32_sub() {
-        let lhs = Value::from(1500i32);
-        let rhs = Value::from(2001i32);
-        let expected = Value::from(1500i32 - 2001i32);
-        let actual = lhs - rhs;
-        assert_eq!(expected, actual);
+    fn test_u32_arith() {
+        all_arith_tests!(u32, 100, 5);
+        all_arith_tests!(u32, 586858, 1);
+        all_arith_tests!(u32, 86, 4);
     }
 
     #[test]
-    fn test_i64_sub() {
-        let lhs = Value::from(1500i64);
-        let rhs = Value::from(2001i64);
-        let expected = Value::from(1500i64 - 2001i64);
-        let actual = lhs - rhs;
-        assert_eq!(expected, actual);
-    }
-
-    #[test]
-    fn test_f32_sub() {
-        let lhs = Value::from(std::f32::consts::PI);
-        let rhs = Value::from(0.000002f32);
-        let expected = Value::from(std::f32::consts::PI - 0.000002);
-        let actual = lhs - rhs;
-        assert_eq!(expected, actual);
-    }
-
-    #[test]
-    fn test_f64_sub() {
-        let lhs = Value::from(std::f64::consts::PI);
-        let rhs = Value::from(1.3456f64);
-        let expected = Value::from(std::f64::consts::PI - 1.3456);
-        let actual = lhs - rhs;
-        assert_eq!(expected, actual);
-    }
-
-    #[test]
-    fn test_u8_sub() {
-        let lhs = Value::from(240u8);
-        let rhs = Value::from(2u8);
-        let expected = Value::from(238u8);
-        let actual = lhs - rhs;
-        assert_eq!(expected, actual);
-    }
-
-    #[test]
-    fn test_u16_sub() {
-        let lhs = Value::from(1800u16);
-        let rhs = Value::from(1005u16);
-        let expected = Value::from(1800u16 - 1005u16);
-        let actual = lhs - rhs;
-        assert_eq!(expected, actual);
-    }
-
-    #[test]
-    fn test_u32_sub() {
-        let lhs = Value::from(1800u32);
-        let rhs = Value::from(1005u32);
-        let expected = Value::from(1800u32 - 1005u32);
-        let actual = lhs - rhs;
-        assert_eq!(expected, actual);
-    }
-
-    #[test]
-    fn test_u64_sub() {
-        let lhs = Value::from(1800u64);
-        let rhs = Value::from(1005u64);
-        let expected = Value::from(1800u64 - 1005u64);
-        let actual = lhs - rhs;
-        assert_eq!(expected, actual);
-    }
-
-    // std::ops::Mul tests
-    #[test]
-    fn test_i8_mul() {
-        let lhs = Value::from(5i8);
-        let rhs = Value::from(5i8);
-        let expected = Value::from(25i8);
-        let actual = lhs * rhs;
-        assert_eq!(expected, actual);
-    }
-
-    #[test]
-    fn test_i16_mul() {
-        let lhs = Value::from(10i16);
-        let rhs = Value::from(20i16);
-        let expected = Value::from(200i16);
-        let actual = lhs * rhs;
-        assert_eq!(expected, actual);
-    }
-
-    #[test]
-    fn test_i32_mul() {
-        let lhs = Value::from(8i32);
-        let rhs = Value::from(4i32);
-        let expected = Value::from(32i32);
-        let actual = lhs * rhs;
-        assert_eq!(expected, actual);
-    }
-
-    #[test]
-    fn test_i64_mul() {
-        let lhs = Value::from(100i64);
-        let rhs = Value::from(50i64);
-        let expected = Value::from(5000i64);
-        let actual = lhs * rhs;
-        assert_eq!(expected, actual);
-    }
-
-    #[test]
-    fn test_f32_mul() {
-        let lhs = Value::from(2.5f32);
-        let rhs = Value::from(1.5f32);
-        let expected = Value::from(3.75f32);
-        let actual = lhs * rhs;
-        assert_eq!(expected, actual);
-    }
-
-    #[test]
-    fn test_f64_mul() {
-        let lhs = Value::from(3.14f64);
-        let rhs = Value::from(2.5f64);
-        let expected = Value::from((3.14 * 2.5) as f64);
-        let actual = lhs * rhs;
-        assert_eq!(expected, actual);
-    }
-
-    #[test]
-    fn test_u8_mul() {
-        let lhs = Value::from(5u8);
-        let rhs = Value::from(3u8);
-        let expected = Value::from(15u8);
-        let actual = lhs * rhs;
-        assert_eq!(expected, actual);
-    }
-
-    #[test]
-    fn test_u16_mul() {
-        let lhs = Value::from(100u16);
-        let rhs = Value::from(10u16);
-        let expected = Value::from(1000u16);
-        let actual = lhs * rhs;
-        assert_eq!(expected, actual);
-    }
-
-    #[test]
-    fn test_u32_mul() {
-        let lhs = Value::from(8u32);
-        let rhs = Value::from(4u32);
-        let expected = Value::from(32u32);
-        let actual = lhs * rhs;
-        assert_eq!(expected, actual);
-    }
-
-    #[test]
-    fn test_u64_mul() {
-        let lhs = Value::from(100u64);
-        let rhs = Value::from(50u64);
-        let expected = Value::from(5000u64);
-        let actual = lhs * rhs;
-        assert_eq!(expected, actual);
-    }
-
-    // std::ops::Div tests
-
-    #[test]
-    fn test_i8_div() {
-        let lhs = Value::from(10i8);
-        let rhs = Value::from(2i8);
-        let expected = Value::from(5i8);
-        let actual = lhs / rhs;
-        assert_eq!(expected, actual);
-    }
-
-    #[test]
-    fn test_i16_div() {
-        let lhs = Value::from(100i16);
-        let rhs = Value::from(20i16);
-        let expected = Value::from(5i16);
-        let actual = lhs / rhs;
-        assert_eq!(expected, actual);
-    }
-
-    #[test]
-    fn test_i32_div() {
-        let lhs = Value::from(50i32);
-        let rhs = Value::from(5i32);
-        let expected = Value::from(10i32);
-        let actual = lhs / rhs;
-        assert_eq!(expected, actual);
-    }
-
-    #[test]
-    fn test_i64_div() {
-        let lhs = Value::from(100i64);
-        let rhs = Value::from(10i64);
-        let expected = Value::from(10i64);
-        let actual = lhs / rhs;
-        assert_eq!(expected, actual);
-    }
-
-    #[test]
-    fn test_f32_div() {
-        let lhs = Value::from(7.5f32);
-        let rhs = Value::from(2.5f32);
-        let expected = Value::from(3.0f32);
-        let actual = lhs / rhs;
-        assert_eq!(expected, actual);
-    }
-
-    #[test]
-    fn test_f64_div() {
-        let lhs = Value::from(12.6f64);
-        let rhs = Value::from(2.0f64);
-        let expected = Value::from(6.3f64);
-        let actual = lhs / rhs;
-        assert_eq!(expected, actual);
-    }
-
-    #[test]
-    fn test_u8_div() {
-        let lhs = Value::from(20u8);
-        let rhs = Value::from(5u8);
-        let expected = Value::from(4u8);
-        let actual = lhs / rhs;
-        assert_eq!(expected, actual);
-    }
-
-    #[test]
-    fn test_u16_div() {
-        let lhs = Value::from(100u16);
-        let rhs = Value::from(20u16);
-        let expected = Value::from(5u16);
-        let actual = lhs / rhs;
-        assert_eq!(expected, actual);
-    }
-
-    #[test]
-    fn test_u32_div() {
-        let lhs = Value::from(50u32);
-        let rhs = Value::from(5u32);
-        let expected = Value::from(10u32);
-        let actual = lhs / rhs;
-        assert_eq!(expected, actual);
-    }
-
-    #[test]
-    fn test_u64_div() {
-        let lhs = Value::from(100u64);
-        let rhs = Value::from(10u64);
-        let expected = Value::from(10u64);
-        let actual = lhs / rhs;
-        assert_eq!(expected, actual);
-    }
-
-    // std::ops::Rem tests
-
-    #[test]
-    fn test_i8_rem() {
-        let lhs = Value::from(10i8);
-        let rhs = Value::from(3i8);
-        let expected = Value::from(1i8);
-        let actual = lhs % rhs;
-        assert_eq!(expected, actual);
-    }
-
-    #[test]
-    fn test_i16_rem() {
-        let lhs = Value::from(100i16);
-        let rhs = Value::from(30i16);
-        let expected = Value::from(10i16);
-        let actual = lhs % rhs;
-        assert_eq!(expected, actual);
-    }
-
-    #[test]
-    fn test_i32_rem() {
-        let lhs = Value::from(50i32);
-        let rhs = Value::from(7i32);
-        let expected = Value::from(1i32);
-        let actual = lhs % rhs;
-        assert_eq!(expected, actual);
-    }
-
-    #[test]
-    fn test_i64_rem() {
-        let lhs = Value::from(100i64);
-        let rhs = Value::from(15i64);
-        let expected = Value::from(10i64);
-        let actual = lhs % rhs;
-        assert_eq!(expected, actual);
-    }
-
-    #[test]
-    fn test_u8_rem() {
-        let lhs = Value::from(20u8);
-        let rhs = Value::from(7u8);
-        let expected = Value::from(6u8);
-        let actual = lhs % rhs;
-        assert_eq!(expected, actual);
-    }
-
-    #[test]
-    fn test_u16_rem() {
-        let lhs = Value::from(100u16);
-        let rhs = Value::from(30u16);
-        let expected = Value::from(10u16);
-        let actual = lhs % rhs;
-        assert_eq!(expected, actual);
-    }
-
-    #[test]
-    fn test_u32_rem() {
-        let lhs = Value::from(50u32);
-        let rhs = Value::from(7u32);
-        let expected = Value::from(1u32);
-        let actual = lhs % rhs;
-        assert_eq!(expected, actual);
-    }
-
-    #[test]
-    fn test_u64_rem() {
-        let lhs = Value::from(100u64);
-        let rhs = Value::from(15u64);
-        let expected = Value::from(10u64);
-        let actual = lhs % rhs;
-        assert_eq!(expected, actual);
-    }
-
-    #[test]
-    fn test_f32_rem() {
-        let lhs = Value::from(7.5f32);
-        let rhs = Value::from(2.5f32);
-        let expected = Value::from(0.0f32);
-        let actual = lhs % rhs;
-        assert_eq!(expected, actual);
-    }
-
-    #[test]
-    fn test_f64_rem() {
-        let lhs = Value::from(12.6f64);
-        let rhs = Value::from(2.0f64);
-        let expected = Value::from((12.6 % 2.0) as f64);
-        let actual = lhs % rhs;
-        assert_eq!(expected, actual);
+    fn test_u64_arith() {
+        all_arith_tests!(u64, 100, 5);
+        all_arith_tests!(u64, 586858, 1);
+        all_arith_tests!(u64, 86, 4);
     }
 
     // std::ops::BitAnd tests
 
+    macro_rules! all_bit_tests {
+        ($type:ty, $lhs:expr, $rhs:expr) => {
+            bin_test!($type, $lhs, $rhs, &);
+            bin_test!($type, $lhs, $rhs, |);
+            bin_test!($type, $lhs, $rhs, ^);
+        };
+    }
+    
     #[test]
-    fn test_i8_bitand() {
-        let lhs = Value::from(10i8);
-        let rhs = Value::from(5i8);
-        let expected = Value::from(10i8 & 5i8);
-        let actual = lhs & rhs;
-        assert_eq!(expected, actual);
+    fn test_i8_bitops() {
+        all_bit_tests!(i8, 2i8, 100i8);
+        all_bit_tests!(i8, 20i8, 4i8);
+        all_bit_tests!(i8, 22i8, 5i8);
     }
 
     #[test]
-    fn test_i16_bitand() {
-        let lhs = Value::from(100i16);
-        let rhs = Value::from(50i16);
-        let expected = Value::from(100i16 & 50i16);
-        let actual = lhs & rhs;
-        assert_eq!(expected, actual);
+    fn test_i16_bitops() {
+        all_bit_tests!(i16, 100i16, 101i16);
+        all_bit_tests!(i16, 20i16, 4i16);
+        all_bit_tests!(i16, 22i16, 5i16);
     }
 
     #[test]
-    fn test_i32_bitand() {
-        let lhs = Value::from(1000i32);
-        let rhs = Value::from(500i32);
-        let expected = Value::from(1000i32 & 500i32);
-        let actual = lhs & rhs;
-        assert_eq!(expected, actual);
+    fn test_i32_bitops() {
+        all_bit_tests!(i32, 120i32, 55i32);
+        all_bit_tests!(i32, 20i32, 4i32);
+        all_bit_tests!(i32, 22i32, 5i32);
     }
 
     #[test]
-    fn test_i64_bitand() {
-        let lhs = Value::from(10000i64);
-        let rhs = Value::from(5000i64);
-        let expected = Value::from(10000i64 & 5000i64);
-        let actual = lhs & rhs;
-        assert_eq!(expected, actual);
+    fn test_i64_bitops() {
+        all_bit_tests!(i64, 100i64, 50i64);
+        all_bit_tests!(i64, 20i64, 4i64);
+        all_bit_tests!(i64, 26i64, 100i64);
     }
 
     #[test]
-    fn test_u8_bitand() {
-        let lhs = Value::from(200u8);
-        let rhs = Value::from(100u8);
-        let expected = Value::from(200u8 & 100u8);
-        let actual = lhs & rhs;
-        assert_eq!(expected, actual);
+    fn test_u8_bitops() {
+        all_bit_tests!(u8, 100u8, 50u8);
+        all_bit_tests!(u8, 20u8, 4u8);
+        all_bit_tests!(u8, 2u8, 5u8);
     }
 
     #[test]
-    fn test_u16_bitand() {
-        let lhs = Value::from(500u16);
-        let rhs = Value::from(250u16);
-        let expected = Value::from(500u16 & 250u16);
-        let actual = lhs & rhs;
-        assert_eq!(expected, actual);
+    fn test_u16_bitops() {
+        all_bit_tests!(u16, 100u16, 50u16);
+        all_bit_tests!(u16, 20u16, 4u16);
+        all_bit_tests!(u16, 2u16, 5u16);
     }
 
     #[test]
-    fn test_u32_bitand() {
-        let lhs = Value::from(1000u32);
-        let rhs = Value::from(500u32);
-        let expected = Value::from(1000u32 & 500u32);
-        let actual = lhs & rhs;
-        assert_eq!(expected, actual);
+    fn test_u32_bitops() {
+        all_bit_tests!(u32, 100u32, 50u32);
+        all_bit_tests!(u32, 20u32, 4u32);
+        all_bit_tests!(u32, 2u32, 5u32);
     }
 
     #[test]
-    fn test_u64_bitand() {
-        let lhs = Value::from(10000u64);
-        let rhs = Value::from(5000u64);
-        let expected = Value::from(10000u64 & 5000u64);
-        let actual = lhs & rhs;
-        assert_eq!(expected, actual);
+    fn test_u64_bitops() {
+        all_bit_tests!(u64, 100u64, 50u64);
+        all_bit_tests!(u64, 20u64, 4u64);
+        all_bit_tests!(u64, 2u64, 5u64);
     }
-
-    // std::ops::BitOr tests
-
-    #[test]
-    fn test_i8_bitor() {
-        let lhs = Value::from(10i8);
-        let rhs = Value::from(5i8);
-        let expected = Value::from(10i8 | 5i8);
-        let actual = lhs | rhs;
-        assert_eq!(expected, actual);
-    }
-
-    #[test]
-    fn test_i16_bitor() {
-        let lhs = Value::from(100i16);
-        let rhs = Value::from(50i16);
-        let expected = Value::from(100i16 | 50i16);
-        let actual = lhs | rhs;
-        assert_eq!(expected, actual);
-    }
-
-    #[test]
-    fn test_i32_bitor() {
-        let lhs = Value::from(1000i32);
-        let rhs = Value::from(500i32);
-        let expected = Value::from(1000i32 | 500i32);
-        let actual = lhs | rhs;
-        assert_eq!(expected, actual);
-    }
-
-    #[test]
-    fn test_i64_bitor() {
-        let lhs = Value::from(10000i64);
-        let rhs = Value::from(5000i64);
-        let expected = Value::from(10000i64 | 5000i64);
-        let actual = lhs | rhs;
-        assert_eq!(expected, actual);
-    }
-
-    #[test]
-    fn test_u8_bitor() {
-        let lhs = Value::from(200u8);
-        let rhs = Value::from(100u8);
-        let expected = Value::from(200u8 | 100u8);
-        let actual = lhs | rhs;
-        assert_eq!(expected, actual);
-    }
-
-    #[test]
-    fn test_u16_bitor() {
-        let lhs = Value::from(500u16);
-        let rhs = Value::from(250u16);
-        let expected = Value::from(500u16 | 250u16);
-        let actual = lhs | rhs;
-        assert_eq!(expected, actual);
-    }
-
-    #[test]
-    fn test_u32_bitor() {
-        let lhs = Value::from(1000u32);
-        let rhs = Value::from(500u32);
-        let expected = Value::from(1000u32 | 500u32);
-        let actual = lhs | rhs;
-        assert_eq!(expected, actual);
-    }
-
-    #[test]
-    fn test_u64_bitor() {
-        let lhs = Value::from(10000u64);
-        let rhs = Value::from(5000u64);
-        let expected = Value::from(10000u64 | 5000u64);
-        let actual = lhs | rhs;
-        assert_eq!(expected, actual);
-    }
-
-    // std::ops::BitXor tests
-
-    #[test]
-    fn test_i8_bitxor() {
-        let lhs = Value::from(10i8);
-        let rhs = Value::from(5i8);
-        let expected = Value::from(10i8 ^ 5i8);
-        let actual = lhs ^ rhs;
-        assert_eq!(expected, actual);
-    }
-
-    #[test]
-    fn test_i16_bitxor() {
-        let lhs = Value::from(100i16);
-        let rhs = Value::from(50i16);
-        let expected = Value::from(100i16 ^ 50i16);
-        let actual = lhs ^ rhs;
-        assert_eq!(expected, actual);
-    }
-
-    #[test]
-    fn test_i32_bitxor() {
-        let lhs = Value::from(1000i32);
-        let rhs = Value::from(500i32);
-        let expected = Value::from(1000i32 ^ 500i32);
-        let actual = lhs ^ rhs;
-        assert_eq!(expected, actual);
-    }
-
-    #[test]
-    fn test_i64_bitxor() {
-        let lhs = Value::from(10000i64);
-        let rhs = Value::from(5000i64);
-        let expected = Value::from(10000i64 ^ 5000i64);
-        let actual = lhs ^ rhs;
-        assert_eq!(expected, actual);
-    }
-
-    #[test]
-    fn test_u8_bitxor() {
-        let lhs = Value::from(200u8);
-        let rhs = Value::from(100u8);
-        let expected = Value::from(200u8 ^ 100u8);
-        let actual = lhs ^ rhs;
-        assert_eq!(expected, actual);
-    }
-
-    #[test]
-    fn test_u16_bitxor() {
-        let lhs = Value::from(500u16);
-        let rhs = Value::from(250u16);
-        let expected = Value::from(500u16 ^ 250u16);
-        let actual = lhs ^ rhs;
-        assert_eq!(expected, actual);
-    }
-
-    #[test]
-    fn test_u32_bitxor() {
-        let lhs = Value::from(1000u32);
-        let rhs = Value::from(500u32);
-        let expected = Value::from(1000u32 ^ 500u32);
-        let actual = lhs ^ rhs;
-        assert_eq!(expected, actual);
-    }
-
-    #[test]
-    fn test_u64_bitxor() {
-        let lhs = Value::from(10000u64);
-        let rhs = Value::from(5000u64);
-        let expected = Value::from(10000u64 ^ 5000u64);
-        let actual = lhs ^ rhs;
-        assert_eq!(expected, actual);
-    }
-
     // std::ops::Shl tests
 
-    #[test]
-    fn test_i8_shl() {
-        let lhs = Value::from(10i8);
-        let rhs = Value::from(2i8);
-        let expected = Value::from(10i8 << 2i8);
-        let actual = lhs << rhs;
-        assert_eq!(expected, actual);
+    macro_rules! shift_tests {
+        ($type:ty, $lhs:expr, $rhs:expr) => {
+            bin_test!($type, $lhs, $rhs, <<);
+            bin_test!($type, $lhs, $rhs, >>);
+        };
     }
 
     #[test]
-    fn test_i16_shl() {
-        let lhs = Value::from(100i16);
-        let rhs = Value::from(3i16);
-        let expected = Value::from(100i16 << 3i16);
-        let actual = lhs << rhs;
-        assert_eq!(expected, actual);
+    fn test_i8_shift() {
+        shift_tests!(i8, 100i8, 3i8);
+        shift_tests!(i8, 20i8, 4i8);
+        shift_tests!(i8, 22i8, 5i8);
     }
 
     #[test]
-    fn test_i32_shl() {
-        let lhs = Value::from(1000i32);
-        let rhs = Value::from(4i32);
-        let expected = Value::from(1000i32 << 4i32);
-        let actual = lhs << rhs;
-        assert_eq!(expected, actual);
+    fn test_i16_shift() {
+        shift_tests!(i16, 100i16, 3i16);
+        shift_tests!(i16, 20i16, 4i16);
+        shift_tests!(i16, 22i16, 5i16);
     }
 
     #[test]
-    fn test_i64_shl() {
-        let lhs = Value::from(10000i64);
-        let rhs = Value::from(5i64);
-        let expected = Value::from(10000i64 << 5i64);
-        let actual = lhs << rhs;
-        assert_eq!(expected, actual);
+    fn test_i32_shift() {
+        shift_tests!(i32, 100i32, 3i32);
+        shift_tests!(i32, 20i32, 4i32);
+        shift_tests!(i32, 22i32, 5i32);
     }
 
     #[test]
-    fn test_u8_shl() {
-        let lhs = Value::from(200u8);
-        let rhs = Value::from(2u8);
-        let expected = Value::from(200u8 << 2u8);
-        let actual = lhs << rhs;
-        assert_eq!(expected, actual);
+    fn test_i64_shift() {
+        shift_tests!(i64, 100i64, 3i64);
+        shift_tests!(i64, 20i64, 4i64);
+        shift_tests!(i64, 22i64, 5i64);
     }
 
     #[test]
-    fn test_u16_shl() {
-        let lhs = Value::from(500u16);
-        let rhs = Value::from(3u16);
-        let expected = Value::from(500u16 << 3u16);
-        let actual = lhs << rhs;
-        assert_eq!(expected, actual);
+    fn test_u8_shift() {
+        shift_tests!(u8, 100u8, 3u8);
+        shift_tests!(u8, 20u8, 4u8);
+        shift_tests!(u8, 22u8, 5u8);
     }
 
     #[test]
-    fn test_u32_shl() {
-        let lhs = Value::from(1000u32);
-        let rhs = Value::from(4u32);
-        let expected = Value::from(1000u32 << 4u32);
-        let actual = lhs << rhs;
-        assert_eq!(expected, actual);
+    fn test_u16_shift() {
+        shift_tests!(u16, 100u16, 3u16);
+        shift_tests!(u16, 20u16, 4u16);
+        shift_tests!(u16, 22u16, 5u16);
     }
 
     #[test]
-    fn test_u64_shl() {
+    fn test_u32_shift() {
+        shift_tests!(u32, 100u32, 3u32);
+        shift_tests!(u32, 20u32, 4u32);
+        shift_tests!(u32, 22u32, 5u32);
+    }
+
+    #[test]
+    fn test_u64_shift() {
         let lhs = Value::from(10000u64);
         let rhs = Value::from(5u64);
         let expected = Value::from(10000u64 << 5u64);
@@ -1332,201 +805,124 @@ mod tests {
         assert_eq!(expected, actual);
     }
 
-    // std::ops::Shr tests
-
-    #[test]
-    fn test_i8_shr() {
-        let lhs = Value::from(10i8);
-        let rhs = Value::from(2i8);
-        let expected = Value::from(10i8 >> 2i8);
-        let actual = lhs >> rhs;
-        assert_eq!(expected, actual);
-    }
-
-    #[test]
-    fn test_i16_shr() {
-        let lhs = Value::from(100i16);
-        let rhs = Value::from(3i16);
-        let expected = Value::from(100i16 >> 3i16);
-        let actual = lhs >> rhs;
-        assert_eq!(expected, actual);
-    }
-
-    #[test]
-    fn test_i32_shr() {
-        let lhs = Value::from(1000i32);
-        let rhs = Value::from(4i32);
-        let expected = Value::from(1000i32 >> 4i32);
-        let actual = lhs >> rhs;
-        assert_eq!(expected, actual);
-    }
-
-    #[test]
-    fn test_i64_shr() {
-        let lhs = Value::from(10000i64);
-        let rhs = Value::from(5i64);
-        let expected = Value::from(10000i64 >> 5i64);
-        let actual = lhs >> rhs;
-        assert_eq!(expected, actual);
-    }
-
-    #[test]
-    fn test_u8_shr() {
-        let lhs = Value::from(200u8);
-        let rhs = Value::from(2u8);
-        let expected = Value::from(200u8 >> 2u8);
-        let actual = lhs >> rhs;
-        assert_eq!(expected, actual);
-    }
-
-    #[test]
-    fn test_u16_shr() {
-        let lhs = Value::from(500u16);
-        let rhs = Value::from(3u16);
-        let expected = Value::from(500u16 >> 3u16);
-        let actual = lhs >> rhs;
-        assert_eq!(expected, actual);
-    }
-
-    #[test]
-    fn test_u32_shr() {
-        let lhs = Value::from(1000u32);
-        let rhs = Value::from(4u32);
-        let expected = Value::from(1000u32 >> 4u32);
-        let actual = lhs >> rhs;
-        assert_eq!(expected, actual);
-    }
-
-    #[test]
-    fn test_u64_shr() {
-        let lhs = Value::from(10000u64);
-        let rhs = Value::from(5u64);
-        let expected = Value::from(10000u64 >> 5u64);
-        let actual = lhs >> rhs;
-        assert_eq!(expected, actual);
-    }
-
     // std::ops::Not tests
+
+    macro_rules! unary_test {
+        ($type:ty, $val:expr, $op:tt) => {
+            let value = Value::from($val);
+            let expected = Value::from($op$val);
+            let actual = $op value;
+            assert_eq!(expected, actual);
+        };
+    }
+
+    macro_rules! not_tests {
+        ($type:ty, $val:expr) => {
+            unary_test!($type, $val, !);
+        };
+    }
 
     #[test]
     fn test_i8_not() {
-        let value = Value::from(10i8);
-        let expected = Value::from(!10i8);
-        let actual = !value;
-        assert_eq!(expected, actual);
+        not_tests!(i8, 100i8);
+        not_tests!(i8, 20i8);
+        not_tests!(i8, 22i8);
     }
 
     #[test]
     fn test_i16_not() {
-        let value = Value::from(100i16);
-        let expected = Value::from(!100i16);
-        let actual = !value;
-        assert_eq!(expected, actual);
+        not_tests!(i16, 1245i16);
+        not_tests!(i16, 1005i16);
     }
 
     #[test]
     fn test_i32_not() {
-        let value = Value::from(1000i32);
-        let expected = Value::from(!1000i32);
-        let actual = !value;
-        assert_eq!(expected, actual);
+        not_tests!(i32, 10000i32);
+        not_tests!(i32, 5000i32);
     }
 
     #[test]
     fn test_i64_not() {
-        let value = Value::from(10000i64);
-        let expected = Value::from(!10000i64);
-        let actual = !value;
-        assert_eq!(expected, actual);
+        not_tests!(i64, 100000i64);
+        not_tests!(i64, 50000i64);
     }
 
     #[test]
     fn test_u8_not() {
-        let value = Value::from(200u8);
-        let expected = Value::from(!200u8);
-        let actual = !value;
-        assert_eq!(expected, actual);
+        not_tests!(u8, 100u8);
+        not_tests!(u8, 20u8);
+        not_tests!(u8, std::u8::MAX);
+        not_tests!(u8, std::u8::MIN);
     }
 
     #[test]
     fn test_u16_not() {
-        let value = Value::from(500u16);
-        let expected = Value::from(!500u16);
-        let actual = !value;
-        assert_eq!(expected, actual);
+        not_tests!(u16, 1000u16);
+        not_tests!(u16, 2000u16);
+        not_tests!(u16, std::u16::MAX);
+        not_tests!(u16, std::u16::MIN);
     }
 
     #[test]
     fn test_u32_not() {
-        let value = Value::from(1000u32);
-        let expected = Value::from(!1000u32);
-        let actual = !value;
-        assert_eq!(expected, actual);
+        not_tests!(u32, std::u32::MAX);
+        not_tests!(u32, std::u32::MIN);
     }
 
     #[test]
     fn test_u64_not() {
-        let value = Value::from(10000u64);
-        let expected = Value::from(!10000u64);
-        let actual = !value;
-        assert_eq!(expected, actual);
+        not_tests!(u64, std::u64::MAX);
+        not_tests!(u64, std::u64::MIN);
     }
 
     #[test]
     fn test_bool_not() {
-        let value = Value::from(true);
-        let expected = Value::from(!true);
-        let actual = !value;
-        assert_eq!(expected, actual);
+        not_tests!(bool, true);
+        not_tests!(bool, false);
     }
 
     // std::ops::Neg tests
 
+    macro_rules! neg_tests {
+        ($type:ty, $val:expr) => {
+            unary_test!($type, $val, -);
+        };
+    }
+    
+
     #[test]
     fn test_i8_neg() {
-        let value = Value::from(10i8);
-        let expected = Value::from(-10i8);
-        let actual = -value;
-        assert_eq!(expected, actual);
+        neg_tests!(i8, 100i8);
+        neg_tests!(i8, -20i8);
     }
 
     #[test]
     fn test_i16_neg() {
-        let value = Value::from(100i16);
-        let expected = Value::from(-100i16);
-        let actual = -value;
-        assert_eq!(expected, actual);
+        neg_tests!(i16, 1245i16);
+        neg_tests!(i16, -1005i16);
     }
 
     #[test]
     fn test_i32_neg() {
-        let value = Value::from(1000i32);
-        let expected = Value::from(-1000i32);
-        let actual = -value;
-        assert_eq!(expected, actual);
+        neg_tests!(i32, 10000i32);
+        neg_tests!(i32, -5000i32);
     }
 
     #[test]
     fn test_i64_neg() {
-        let value = Value::from(10000i64);
-        let expected = Value::from(-10000i64);
-        let actual = -value;
-        assert_eq!(expected, actual);
+        neg_tests!(i64, 100000i64);
+        neg_tests!(i64, -50000i64);
     }
 
     #[test]
     fn test_f32_neg() {
-        let value = Value::from(3.14f32);
-        let expected = Value::from(-3.14f32);
-        let actual = -value;
-        assert_eq!(expected, actual);
+        neg_tests!(f32, std::f32::consts::PI);
+        neg_tests!(f32, -std::f32::consts::E);
     }
 
     #[test]
     fn test_f64_neg() {
-        let value = Value::from(3.14f64);
-        let expected = Value::from(-3.14f64);
-        let actual = -value;
-        assert_eq!(expected, actual);
+        neg_tests!(f64, std::f64::consts::PI);
+        neg_tests!(f64, -std::f64::consts::E);
     }
 }
