@@ -1,7 +1,9 @@
-use super::{value::{TypeFlag, Value}, instruction::Instruction};
+use super::{
+    instruction::Instruction,
+    value::{TypeFlag, Value},
+};
 
 const STACK_SIZE: usize = 1024;
-
 
 macro_rules! binop_helper {
     ($fn_name:ident, $op:tt) => {
@@ -26,13 +28,28 @@ macro_rules! comp_helper {
     };
 }
 
+
+macro_rules! bytecode {
+    ( $( $item:expr ),* ) => {
+        {
+            let mut tmp_vec: Vec<u8> = vec![];
+
+            $(
+                tmp_vec.push($item as u8);
+            )*
+
+            tmp_vec
+        }
+    }
+}
+
 pub struct Machine {
     stack: [u64; STACK_SIZE],
     sp: usize,
     code: Vec<u8>,
     ip: usize,
     heap: Vec<u8>,
-    ty_flag: TypeFlag,// 0 = i8, 1 = i16, 2 = i32, 3 = i64, 4 = f32, 5 = f64, 6 = bool, 7 = char, 8 = u8, 9 = u16, 10 = u32, 11 = u64
+    ty_flag: TypeFlag, // 0 = i8, 1 = i16, 2 = i32, 3 = i64, 4 = f32, 5 = f64, 6 = bool, 7 = char, 8 = u8, 9 = u16, 10 = u32, 11 = u64
 }
 
 impl Machine {
@@ -43,8 +60,21 @@ impl Machine {
             code: Vec::new(),
             ip: 0,
             heap: Vec::new(),
-            ty_flag: 11.into(),// default to u64
+            ty_flag: 11.into(), // default to u64
         }
+    }
+
+    fn zero(&mut self) {
+        self.stack.fill(0);
+        self.sp = 0;
+        self.code = vec![];
+        self.ip = 0;
+        self.heap = vec![];
+        self.ty_flag = 11.into();
+    }
+
+    fn push_code(&mut self, code: &[u8]) {
+        self.code.extend_from_slice(code)
     }
 
     fn stack_push(&mut self, raw: u64) {
@@ -65,7 +95,7 @@ impl Machine {
     }
 
     fn value_push(&mut self, value: Value) {
-        // push a value to the stack 
+        // push a value to the stack
         self.stack_push(value.to_stack());
     }
 
@@ -76,13 +106,12 @@ impl Machine {
     fn set_ty_flag(&mut self) {
         // ip currently points to the SET_TYPE instruction
         // increment ip to point to the next byte which is the type flag
-        self.ip += 1;
         self.ty_flag = self.code[self.ip].into();
         self.ip += 1;
     }
 
     fn get_ty_flag(&mut self) {
-        self.stack_push(self.ty_flag.into());            
+        self.stack_push(self.ty_flag.into());
     }
 
     binop_helper!(add, +);
@@ -96,7 +125,8 @@ impl Machine {
     binop_helper!(rem, %);
 
     fn neg(&mut self) {
-        self.stack[self.sp - 1] = (-(Value::from_stack(self.ty_flag, self.stack[self.sp - 1]))).to_stack();
+        self.stack[self.sp - 1] =
+            (-(Value::from_stack(self.ty_flag, self.stack[self.sp - 1]))).to_stack();
     }
 
     fn incr(&mut self) {
@@ -123,7 +153,8 @@ impl Machine {
     binop_helper!(shr, >>);
 
     fn not(&mut self) {
-        self.stack[self.sp - 1] = (!Value::from_stack(self.ty_flag, self.stack[self.sp - 1])).to_stack();
+        self.stack[self.sp - 1] =
+            (!Value::from_stack(self.ty_flag, self.stack[self.sp - 1])).to_stack();
     }
 
     fn jmp(&mut self) {
@@ -160,10 +191,12 @@ impl Machine {
     }
 
     fn push(&mut self) {
-        self.ip += 1;
-        let value = Value::from_code(self.ty_flag, &self.code[self.ip..self.ip + self.ty_flag.size()]);
+        let value = Value::from_code(
+            self.ty_flag,
+            &self.code[self.ip..self.ip + self.ty_flag.size()],
+        );
         self.value_push(value);
-        self.ip += self.ty_flag.size() - 1;
+        self.ip += self.ty_flag.size();
     }
 
     fn dup(&mut self) {
@@ -238,13 +271,22 @@ impl Machine {
         let value = self.value_pop();
         println!("{}", value);
     }
+    
+    fn fetch_instr(&mut self) -> Instruction {
+        if self.ip >= self.code.len() {
+            panic!("Error: Instruction pointer has gone out of bounds")
+        }else{
+            self.ip += 1;
+            return self.code[self.ip - 1].into()
+        }
+    }
 
     fn dispatch(&mut self) {
         use Instruction::*;
 
-        let opcode: Instruction = self.code[self.ip].into();
+        let instr = self.fetch_instr();
 
-        match opcode {
+        match instr {
             Halt => self.halt(),
             SetType => self.set_ty_flag(),
             GetType => self.get_ty_flag(),
@@ -273,7 +315,7 @@ impl Machine {
             JmpIfNot => self.jmp_if_not(),
             Call => self.call(),
             Ret => self.ret(),
-            Push => self.push(),
+            Push => self.push(),//
             Dup => self.dup(),
             Drop => self.drop(),
             Swap => self.swap(),
@@ -288,4 +330,93 @@ impl Machine {
             Print => self.println(),
         }
     }
+
+    fn run(&mut self) {
+        while self.ip <= self.code.len() {
+            self.dispatch()
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_internal_stack_ops() {
+        let mut machine = Machine::new();
+
+        machine.stack_push(10);
+        assert_eq!(machine.sp, 1);
+
+        let pop = machine.stack_pop();
+        assert_eq!(pop, 10u64);
+        assert_eq!(machine.sp, 0);
+    }
+
+    #[test]
+    fn test_push_instr() {
+        use Instruction::*;
+        use TypeFlag::*;
+        let mut machine = Machine::new();
+
+        let value: Value = 11i8.into();
+        
+        machine.code = bytecode!(SetType, I8, Push);
+        machine.code.extend_from_slice(&value.to_code());
+        machine.push_code(&bytecode!(Halt));
+        machine.run();
+        assert_eq!(machine.stack[machine.sp - 1], 11);
+    }
+
+    #[test]
+    fn test_arith_instrs() {
+        use Instruction::*;
+        use TypeFlag::*;
+
+        let mut machine = Machine::new();
+
+        let lhs: Value = 1000i64.into();
+        let rhs: Value = 500i64.into();
+        let mut start = vec![];
+        start = bytecode!(SetType, I64, Push);
+        start.extend_from_slice(&lhs.to_code());
+        start.extend_from_slice(&bytecode![Push]);
+        start.extend_from_slice(&rhs.to_code());
+        
+        let mut add_test = start.clone();
+        add_test.extend_from_slice(&bytecode!(Add, Halt));
+        machine.code = add_test;
+        machine.run();
+        assert_eq!(Value::from(1500i64), machine.value_pop());
+        machine.zero();
+
+        let mut sub_test = start.clone();
+        sub_test.extend_from_slice(&bytecode!(Sub, Halt));
+        machine.code = sub_test;
+        machine.run();
+        assert_eq!(Value::from(500i64), machine.value_pop());
+        machine.zero();
+
+        let mut mul_test = start.clone();
+        mul_test.extend_from_slice(&bytecode!(Mul, Halt));
+        machine.code = mul_test;
+        machine.run();
+        assert_eq!(Value::from(50000i64), machine.value_pop());
+        machine.zero();
+
+        let mut div_test = start.clone();
+        div_test.extend_from_slice(&bytecode!(Div, Halt));
+        machine.code = div_test;
+        machine.run();
+        assert_eq!(Value::from(2i64), machine.value_pop());
+        machine.zero();
+
+        let mut rem_test = start;
+        rem_test.extend_from_slice(&bytecode!(Rem, Halt));
+        machine.code = rem_test;
+        machine.run();
+        assert_eq!(Value::from(0i64), machine.value_pop());
+    }
+
 }

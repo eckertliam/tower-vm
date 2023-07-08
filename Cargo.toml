@@ -2,7 +2,6 @@
 name = "tower-vm"
 version = "0.1.0"
 edition = "2021"
-license-file = "LICENSE"
 description = "A VM that emits fast efficient C code"
 repository = "https://github.com/eckertliam/tower-vm"
 license = "Apache-2.0"

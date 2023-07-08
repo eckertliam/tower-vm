@@ -49,7 +49,7 @@ impl From<u8> for TypeFlag {
             9 => Self::U16,
             10 => Self::U32,
             11 => Self::U64,
-            _ => panic!("invalid type flag"),
+            _ => panic!("bad typeflag: {}", byte),
         }
     }
 }
@@ -81,15 +81,23 @@ pub struct Value {
 
 impl Value {
     pub fn to_code(self) -> Vec<u8> {
-        let mut code = Vec::new();
-        code.extend_from_slice(&self.ty.to_code());
-        code.extend_from_slice(&self.data.to_le_bytes());
-        code
+        // trim data bytes to type size
+        self.data.to_le_bytes()[..self.ty.size()].to_vec()
     }
 
     pub fn from_code(ty: TypeFlag, code: &[u8]) -> Self {
         let mut data = [0; 8];
-        data.copy_from_slice(&code[..8]);
+        if code.len() != ty.size() {
+            panic!("{:?} expects {} bytes, got {}", ty, ty.size(), code.len());
+        }else if code.len() != 8 {
+            let mut idx = 0;
+            for byte in code {
+                data[idx] = *byte;
+                idx += 1;
+            }
+        }else{
+            data.copy_from_slice(code);
+        }
         Self {
             ty,
             data: u64::from_le_bytes(data),
@@ -607,7 +615,7 @@ mod tests {
         ($type:ty, $flag:expr, $init:expr) => {
             let init: $type = $init;
             let value = Value::from(init);
-            let code: &[u8] = &value.to_code()[2..];
+            let code: &[u8] = &value.to_code();
             let decode = Value::from_code($flag, code);
             let stack_push = decode.to_stack();
             let stack_pop = Value::from_stack($flag, stack_push);
