@@ -1,3 +1,4 @@
-mod machine;
-mod instruction;
-mod value;
+pub mod machine;
+pub mod instruction;
+pub mod typeflag;
+pub mod value;

@@ -1,6 +1,7 @@
-use super::{
+use crate::interpreter::{
+    typeflag::TypeFlag,
     instruction::Instruction,
-    value::{TypeFlag, Value},
+    value::Value,
 };
 
 const STACK_SIZE: usize = 1024;
@@ -335,6 +336,11 @@ impl Machine {
         while self.ip <= self.code.len() {
             self.dispatch()
         }
+    }
+
+    pub fn execute(&mut self, code: Vec<u8>) {
+        self.code = code;
+        self.run();
     }
 }
 
