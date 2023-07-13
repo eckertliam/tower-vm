@@ -1,4 +1,4 @@
-use crate::interpreter::typeflag::TypeFlag;
+use crate::TypeFlag;
 
 #[derive(Debug, Clone, Copy, Eq)]
 pub struct Value {

@@ -1,7 +1,7 @@
-use crate::interpreter::{
-    typeflag::TypeFlag,
-    instruction::Instruction,
-    value::Value,
+use crate::{
+    Instruction,
+    TypeFlag,
+    Value,
 };
 
 const STACK_SIZE: usize = 1024;

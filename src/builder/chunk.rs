@@ -1,6 +1,7 @@
-use crate::interpreter::{
-    typeflag::TypeFlag,
-    instruction::Instruction,
+use crate::{
+    Instruction,
+    TypeFlag,
+    Value,
 };
 
 // Chunk is used to abstract over the Vec<u8> that is used as code in the machine
@@ -10,6 +11,7 @@ use crate::interpreter::{
 pub enum Chunk {
     Type(TypeFlag),
     Instruction(Instruction),
+    Value(Value),
     Identifier(String),
     Access(String, usize),// access a collection like a[0] etc
 }
@@ -25,6 +27,10 @@ impl Chunk {
 
     pub fn new_ident(ident: &str) -> Chunk {
         Chunk::Identifier(ident.to_string())
+    }
+
+    pub fn new_value(value: Value) -> Chunk {
+        Chunk::Value(value)
     }
 
     pub fn new_access(ident: &str, idx: usize) -> Chunk {
