@@ -4,3 +4,4 @@ mod function;
 
 pub use chunk::Chunk;
 pub use constant::Constant;
+pub use function::Function;

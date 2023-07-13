@@ -11,4 +11,5 @@ pub use interpreter::{
 pub use builder::{
     Chunk,
     Constant,
+    Function,
 };

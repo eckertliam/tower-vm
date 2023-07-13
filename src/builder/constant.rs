@@ -2,6 +2,7 @@ use crate::{Value, TypeFlag};
 
 // constants are stored within their own field in each function
 // constants allow for abstracted static collections accessible only at compile time
+#[derive(Debug, Clone)]
 pub struct Constant {
     collection: bool,
     data: Vec<Value>,
@@ -9,7 +10,7 @@ pub struct Constant {
 }
 
 impl Constant {
-    pub fn new(data: Vec<Value>, id: &str) -> Constant {
+    pub fn new(data: Vec<Value>, id: &str) -> Self {
         let collection = data.len() > 1;
 
         // type check the data, ensure each element is the same type
@@ -22,7 +23,7 @@ impl Constant {
             }
         }
 
-        Constant {
+        Self {
             collection,
             data,
             ident: id.to_string(),
