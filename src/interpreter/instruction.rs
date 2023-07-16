@@ -56,7 +56,7 @@ pub enum Instruction {
     Swap, // swap the top two values on the stack
 
     // heap instructions
-    Load,  // pop address from stack and push value at address as bytes using the current type flag alignment
+    Load,  // pop address from stack and push value at address using the current alignment
     Store, // pop value and address from stack, store value at address as bytes
     Alloc, // pop size from stack, expand heap by sizeof(current type flag) * size, push first address of new heap space
     Free,  // pop address from stack, decrement heap size by sizeof(current type flag) * size

@@ -1,4 +1,5 @@
 mod interpreter;
+mod builder;
 
 
 pub use interpreter::{
@@ -7,3 +8,5 @@ pub use interpreter::{
     TypeFlag,
     Value,
 };
+
+pub use builder::Builder;
