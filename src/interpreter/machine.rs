@@ -1,3 +1,5 @@
+use std::fmt::Write;
+
 use crate::{
     Instruction,
     TypeFlag,
@@ -51,6 +53,7 @@ pub struct Machine {
     ip: usize,
     heap: Vec<u8>,
     ty_flag: TypeFlag, // 0 = i8, 1 = i16, 2 = i32, 3 = i64, 4 = f32, 5 = f64, 6 = bool, 7 = char, 8 = u8, 9 = u16, 10 = u32, 11 = u64
+    stream: Option<String>,
 }
 
 impl Machine {
@@ -62,7 +65,20 @@ impl Machine {
             ip: 0,
             heap: Vec::new(),
             ty_flag: 11.into(), // default to u64
+            stream: None,
         }
+    }
+
+    pub fn write_to_stream(&mut self) {
+        self.stream = Some(String::new());
+    }
+
+    pub fn write_to_out(&mut self) {
+        self.stream = None;
+    }
+
+    pub fn get_stream(&mut self) -> Option<String> {
+        self.stream.clone()
     }
 
     fn zero(&mut self) {
@@ -270,7 +286,11 @@ impl Machine {
 
     fn println(&mut self) {
         let value = self.value_pop();
-        println!("{}", value);
+        
+        match &mut self.stream {
+            Some(stream) => write!(stream, "{}", value).unwrap(),
+            None => print!("{}", value)
+        };
     }
     
     fn fetch_instr(&mut self) -> Instruction {
