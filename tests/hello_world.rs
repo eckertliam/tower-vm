@@ -1,4 +1,4 @@
-use tower_vm::{Builder, Value};
+use tower_vm::Builder;
 
 #[test]
 fn hello_world() {

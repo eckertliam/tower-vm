@@ -27,6 +27,9 @@ impl Builder {
         }
     }
 
+    pub fn debug_chunks(&self) {
+        println!("{:?}", self.chunks)
+    }
     fn get_func(&self, ident: &str) -> Option<u64> {
         self.funcs.get(ident).copied()
     }

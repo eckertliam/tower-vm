@@ -1,5 +1,5 @@
 #[repr(u8)]
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub enum Instruction {
     // machine control instructions
     Halt,    // stop execution

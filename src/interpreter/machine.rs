@@ -1,5 +1,3 @@
-use std::fmt::Write;
-
 use crate::{
     Instruction,
     TypeFlag,
@@ -46,6 +44,7 @@ macro_rules! bytecode {
     }
 }
 
+#[derive(Clone)]
 pub struct Machine {
     stack: [u64; STACK_SIZE],
     sp: usize,
@@ -55,6 +54,7 @@ pub struct Machine {
     ty_flag: TypeFlag, // 0 = i8, 1 = i16, 2 = i32, 3 = i64, 4 = f32, 5 = f64, 6 = bool, 7 = char, 8 = u8, 9 = u16, 10 = u32, 11 = u64
     stream: String,
     read_wait: bool,// if true pauses execution waiting for an external push to string and then pushes string to stack
+    halt: bool,
 }
 
 impl Machine {
@@ -68,6 +68,7 @@ impl Machine {
             ty_flag: 11.into(), // default to u64
             stream: String::new(),
             read_wait: false,
+            halt: false,
         }
     }
 
@@ -135,8 +136,8 @@ impl Machine {
         self.stack_push(value.to_stack());
     }
 
-    fn halt(&self) {
-        std::process::exit(0);
+    fn halt(&mut self) {
+        self.halt = true;
     }
 
     fn set_ty_flag(&mut self) {
@@ -379,7 +380,7 @@ impl Machine {
     }
 
     fn run(&mut self) {
-        while self.ip <= self.code.len() {
+        while self.ip <= self.code.len()  && !self.halt {
             if !self.read_wait {
                 self.dispatch()
             }

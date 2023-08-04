@@ -1,6 +1,6 @@
 use crate::{Value, TypeFlag, Instruction};
 
-#[derive(Debug)]
+#[derive(Debug, Clone, PartialEq, PartialOrd)]
 pub enum Chunk {
     Literal(Value),// expected after push
     Type(TypeFlag), // expected after SetType 

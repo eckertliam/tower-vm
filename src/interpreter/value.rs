@@ -1,6 +1,6 @@
 use crate::TypeFlag;
 
-#[derive(Debug, Clone, Copy, Eq)]
+#[derive(Debug, Clone, Copy)]
 pub struct Value {
     pub ty: TypeFlag,
     pub data: u64,
@@ -991,5 +991,11 @@ mod tests {
     fn test_f64_neg() {
         neg_tests!(f64, std::f64::consts::PI);
         neg_tests!(f64, -std::f64::consts::E);
+    }
+
+    #[test]
+    fn test_to_string() {
+        assert_eq!(Value::from(10).to_string(), "10".to_string());
+        assert_eq!(Value::from('c').to_string(), "c".to_string());
     }
 }
