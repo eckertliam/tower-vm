@@ -7,17 +7,36 @@
         {
             "type": "lldb",
             "request": "launch",
-            "name": "Debug unit tests in library 'spice'",
+            "name": "Debug unit tests in library 'tower-vm'",
             "cargo": {
                 "args": [
                     "test",
                     "--no-run",
                     "--lib",
-                    "--package=spice"
+                    "--package=tower-vm"
                 ],
                 "filter": {
-                    "name": "spice",
+                    "name": "tower-vm",
                     "kind": "lib"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug integration test 'hello_world'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--test=hello_world",
+                    "--package=tower-vm"
+                ],
+                "filter": {
+                    "name": "hello_world",
+                    "kind": "test"
                 }
             },
             "args": [],
