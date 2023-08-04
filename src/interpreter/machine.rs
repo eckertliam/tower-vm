@@ -92,8 +92,12 @@ impl Machine {
         }
     }
 
-    pub fn get_stream(&self) -> String {
-        self.stream.clone()
+    pub fn get_stream(&self) -> Option<String> {
+        if self.stream.len() > 0 {
+            return Some(self.stream.clone());
+        }else{
+            return None;
+        }
     }
 
     pub fn clear_stream(&mut self) {
@@ -108,6 +112,8 @@ impl Machine {
         self.heap = vec![];
         self.ty_flag = 11.into();
         self.clear_stream();
+        self.read_wait = false;
+        self.halt = false;
     }
 
     pub fn push_code(&mut self, code: &[u8]) {
@@ -122,7 +128,10 @@ impl Machine {
 
     fn stack_pop(&mut self) -> u64 {
         // get the raw value from the stack and decrement the stack pointer
-        self.sp -= 1;
+        match self.sp.checked_sub(1) {
+            Some(n) => self.sp = n,
+            None => panic!("Error: Stack underflow has occured."),
+        };
         self.stack[self.sp]
     }
 
@@ -306,7 +315,7 @@ impl Machine {
 
     fn write(&mut self) {
         let value = self.value_pop().to_string();
-        self.stream.push_str(&value);
+        self.stream += &value;
     }
 
     fn read(&mut self) {
@@ -399,6 +408,8 @@ impl Machine {
 
 #[cfg(test)]
 mod tests {
+    use std::vec;
+
     use super::*;
 
     #[test]
@@ -439,9 +450,9 @@ mod tests {
         let rhs: Value = 500i64.into();
         let mut start = vec![];
         start = bytecode!(SetType, I64, Push);
-        start.extend_from_slice(&lhs.to_code());
-        start.extend_from_slice(&bytecode![Push]);
         start.extend_from_slice(&rhs.to_code());
+        start.extend_from_slice(&bytecode![Push]);
+        start.extend_from_slice(&lhs.to_code());
         
         let mut add_test = start.clone();
         add_test.extend_from_slice(&bytecode!(Add, Halt));
@@ -461,7 +472,7 @@ mod tests {
         mul_test.extend_from_slice(&bytecode!(Mul, Halt));
         machine.code = mul_test;
         machine.run();
-        assert_eq!(Value::from(50000i64), machine.value_pop());
+        assert_eq!(Value::from(500000i64), machine.value_pop());
         machine.zero();
 
         let mut div_test = start.clone();
@@ -478,4 +489,14 @@ mod tests {
         assert_eq!(Value::from(0i64), machine.value_pop());
     }
 
+    #[test]
+    fn test_write() {
+        let mut machine = Machine::new();
+        machine.code = vec![Instruction::SetType as u8, TypeFlag::Char as u8, Instruction::Push as u8];
+        machine.code.extend_from_slice(&Value::from('c').to_code());
+        machine.code.extend_from_slice(&vec![Instruction::Write as u8, Instruction::Halt as u8]);
+        machine.execute();
+        let out = machine.get_stream().unwrap();
+        assert_eq!(out, 'c'.to_string());
+    }
 }

@@ -17,8 +17,7 @@ pub enum TypeFlag {
 
 impl TypeFlag {
     pub fn to_code(self) -> Vec<u8> {
-        // first byte is instruction TYPE, second byte is the type flag
-        vec![1, self.into()]
+        vec![self.into()]
     }
 }
 

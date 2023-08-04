@@ -174,7 +174,7 @@ impl Builder {
         if let Some(s) = out {
             let mut values: Vec<Value> = s.chars().into_iter().map(|ch| ch.into()).collect();
             self.push_collect(&mut values);
-            for _ in 0..(s.len() - 1) {
+            for _ in 0..(s.len()) {
                 self.push_instr(Instruction::Write);
             }
         }else{
