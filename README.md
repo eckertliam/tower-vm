@@ -1,3 +1,3 @@
 # Tower Virtual Machine
 
-Tower is a stack based virtual machine that is meant to be a language agnostic runtime. There are plans to add an AOT compilation option, this will be useful, use the VM for testing then once everything works, push out performant machine code that is error free.
+Tower is an experimental stack based VM. With a simple easily read source code and an easily accesible API, it makes Tower easy to use for any backend. 

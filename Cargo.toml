@@ -1,12 +1,10 @@
 [package]
 name = "tower-vm"
-version = "0.2.0"
+version = "0.3.0"
 edition = "2021"
-description = "A neutral stack based VM"
+description = "A language independent stack based VM"
 repository = "https://github.com/eckertliam/tower-vm"
 license = "Apache-2.0"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
 
