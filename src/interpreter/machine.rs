@@ -53,7 +53,8 @@ pub struct Machine {
     ip: usize,
     heap: Vec<u8>,
     ty_flag: TypeFlag, // 0 = i8, 1 = i16, 2 = i32, 3 = i64, 4 = f32, 5 = f64, 6 = bool, 7 = char, 8 = u8, 9 = u16, 10 = u32, 11 = u64
-    stream: Option<String>,
+    stream: String,
+    read_wait: bool,// if true pauses execution waiting for an external push to string and then pushes string to stack
 }
 
 impl Machine {
@@ -65,20 +66,37 @@ impl Machine {
             ip: 0,
             heap: Vec::new(),
             ty_flag: 11.into(), // default to u64
-            stream: None,
+            stream: String::new(),
+            read_wait: false,
         }
     }
 
-    pub fn write_to_stream(&mut self) {
-        self.stream = Some(String::new());
+    fn push_stream(&mut self) {
+        let mut stream = self.stream.clone();
+
+        loop {
+            match stream.pop() {
+                Some(ch) => self.value_push(ch.into()),
+                None => break,
+            }
+        }
     }
 
-    pub fn write_to_out(&mut self) {
-        self.stream = None;
+    pub fn set_stream(&mut self, input: &str) {
+        self.stream = input.to_string();
+        
+        if self.read_wait {
+            self.push_stream();
+            self.read_wait = false;
+        }
     }
 
-    pub fn get_stream(&mut self) -> Option<String> {
+    pub fn get_stream(&self) -> String {
         self.stream.clone()
+    }
+
+    pub fn clear_stream(&mut self) {
+        self.stream = String::new();
     }
 
     fn zero(&mut self) {
@@ -88,9 +106,10 @@ impl Machine {
         self.ip = 0;
         self.heap = vec![];
         self.ty_flag = 11.into();
+        self.clear_stream();
     }
 
-    fn push_code(&mut self, code: &[u8]) {
+    pub fn push_code(&mut self, code: &[u8]) {
         self.code.extend_from_slice(code)
     }
 
@@ -284,15 +303,19 @@ impl Machine {
         self.stack_push(heap_len as u64);
     }
 
-    fn println(&mut self) {
-        let value = self.value_pop();
-        
-        match &mut self.stream {
-            Some(stream) => write!(stream, "{}", value).unwrap(),
-            None => print!("{}", value)
-        };
+    fn write(&mut self) {
+        let value = self.value_pop().to_string();
+        self.stream.push_str(&value);
+    }
+
+    fn read(&mut self) {
+        self.read_wait = true;
     }
     
+    fn print(&mut self) {
+        println!("{}", self.stream)
+    }
+
     fn fetch_instr(&mut self) -> Instruction {
         if self.ip >= self.code.len() {
             panic!("Error: Instruction pointer has gone out of bounds")
@@ -348,17 +371,26 @@ impl Machine {
             StackSize => self.stack_size(),
             LoadCode => self.load_code(),
             SaveCode => self.save_code(),
-            Print => self.println(),
+            Read => self.read(),
+            Write => self.write(),
+            Print => self.print(),
+            Clear => self.clear_stream(),
         }
     }
 
     fn run(&mut self) {
         while self.ip <= self.code.len() {
-            self.dispatch()
+            if !self.read_wait {
+                self.dispatch()
+            }
         }
     }
 
-    pub fn execute(&mut self, code: Vec<u8>) {
+    pub fn execute(&mut self) {
+        self.run()
+    }
+
+    pub fn execute_code(&mut self, code: Vec<u8>) {
         self.code = code;
         self.run();
     }

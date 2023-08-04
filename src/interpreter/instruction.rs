@@ -69,8 +69,10 @@ pub enum Instruction {
     SaveCode, // pop two addresses from stack, take the bytes between the addresses on the code segment and extend the heap with them, and push the address of the new heap segment to the stack
 
     // io instructions
-    // will be extended to support more, print is just for testing
-    Print, // pop value from stack and print it to stdout
+    Read, // halts execution and awaits input to the stream
+    Write, // pops a value from the stack and writes it to the stream
+    Print, // print the stream
+    Clear, // clear the stream
 }
 
 impl From<u8> for Instruction {
@@ -118,7 +120,10 @@ impl From<u8> for Instruction {
             37 => StackSize,
             38 => LoadCode,
             39 => SaveCode,
-            40 => Print,
+            40 => Read,
+            41 => Write,
+            42 => Print,
+            43 => Clear,
             _ => panic!("invalid instruction"),
         }
     }

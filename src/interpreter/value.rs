@@ -38,6 +38,10 @@ impl Value {
     pub fn from_stack(ty: TypeFlag, raw: u64) -> Self {
         Self { ty, data: raw }
     }
+
+    pub fn to_string(self) -> String {
+        self.into()
+    }
 }
 
 macro_rules! impl_from_value {
@@ -521,6 +525,14 @@ impl std::fmt::Display for Value {
         }
     }
 }
+
+impl Into<String> for Value {
+    fn into(self) -> String {
+        format!("{}", self)
+    }
+}
+
+
 
 #[cfg(test)]
 mod tests {

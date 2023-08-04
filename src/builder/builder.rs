@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use super::chunk::Chunk;
 
-use crate::{Instruction, TypeFlag, Value};
+use crate::{Instruction, TypeFlag, Value, Machine};
 
 macro_rules! simple_instr {
     ($fn_name:ident, $instr:ident) => {
@@ -165,7 +165,28 @@ impl Builder {
 
     simple_instr!(save_code, SaveCode);
 
-    simple_instr!(print, Print);
+    pub fn write(&mut self, out: Option<&str>) {
+        // optionally push a string to stack and write the whole thing to stream
+        // otherwise push one write instruction
+        if let Some(s) = out {
+            let mut values: Vec<Value> = s.chars().into_iter().map(|ch| ch.into()).collect();
+            self.push_collect(&mut values);
+            for _ in 0..(s.len() - 1) {
+                self.push_instr(Instruction::Write);
+            }
+        }else{
+            self.push_instr(Instruction::Write);
+        }
+    }
+
+    simple_instr!(read, Read);
+
+    pub fn print(&mut self, out: Option<&str>) {
+        if let Some(s) = out {
+            self.write(Some(s));
+        }
+        self.push_instr(Instruction::Print);
+    }
 
     fn to_code(&mut self) -> Vec<u8> {
         let mut code = vec![];
@@ -178,7 +199,13 @@ impl Builder {
     }
 
     // there will be optional optimization passes here in the distant future
-    pub fn build(&mut self) -> Vec<u8> {
+    pub fn build_code(&mut self) -> Vec<u8> {
         self.to_code()
+    }
+
+    pub fn build_machine(&mut self) -> Machine {
+        let mut machine = Machine::new();
+        machine.push_code(&self.build_code());
+        return machine;
     }
 }
