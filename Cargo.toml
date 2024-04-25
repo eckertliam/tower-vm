@@ -7,5 +7,4 @@ repository = "https://github.com/eckertliam/tower-vm"
 license = "Apache-2.0"
 
 [dependencies]
-
-
+cgen = { git = "https://github.com/eckertliam/cgen.git" }
