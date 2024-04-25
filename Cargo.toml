@@ -2,7 +2,7 @@
 name = "tower-vm"
 version = "0.3.0"
 edition = "2021"
-description = "A language independent stack based VM"
+description = "A language independent stack based VM with AOT compilation"
 repository = "https://github.com/eckertliam/tower-vm"
 license = "Apache-2.0"
 

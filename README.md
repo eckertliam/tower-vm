@@ -1,3 +1,4 @@
 # Tower Virtual Machine
 
-Tower is an experimental stack based VM. With a simple easily read source code and an easily accesible API, it makes Tower easy to use for any backend. 
+Tower VM is a stack based bytecode VM focused on AOT compilation to C.
+Aiming to be minimal but efficient.
